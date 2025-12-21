@@ -46,10 +46,28 @@ pub(crate) fn player_controls(
 ) {
     for mut player in players {
         if let Some(value) = player.1.movement_animation_percentage {
+            let speed = match player.1.movement_direction {
+                Some(MovementDirection::Down) => player.1.falling_speed,
+                _ => player.1.movement_speed,
+            };
+
             player.1.movement_animation_percentage =
-                Some((value + player.1.movement_speed * timer.delta_secs()).clamp(0.0, 1.0));
+                Some((value + speed * timer.delta_secs()).clamp(0.0, 1.0));
 
             // If already moving, then movement cannot be altered
+            continue;
+        }
+
+        if !tiles.iter().any(|tile| {
+            tile.1.is_on_top
+                && tile.1.x == player.1.x
+                && tile.1.y == player.1.y
+                && tile.1.z == player.1.z
+        }) {
+            // Player is not currently standing. Disable movement and start falling instead!
+            player.1.movement_direction = Some(MovementDirection::Down);
+            player.1.movement_animation_percentage = Some(0.0);
+
             continue;
         }
 

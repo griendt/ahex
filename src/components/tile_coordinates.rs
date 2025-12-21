@@ -9,6 +9,7 @@ pub(crate) struct TileCoordinates {
     pub(crate) movement_direction: Option<MovementDirection>,
     pub(crate) movement_animation_percentage: Option<f32>,
     pub(crate) movement_speed: f32,
+    pub(crate) falling_speed: f32,
 }
 
 impl Default for TileCoordinates {
@@ -21,6 +22,7 @@ impl Default for TileCoordinates {
             movement_direction: None,
             movement_animation_percentage: None,
             movement_speed: 1.0,
+            falling_speed: 20.0,
         }
     }
 }
@@ -42,12 +44,12 @@ impl MovementDirection {
         match self {
             MovementDirection::East => (1, 0, 0),
             MovementDirection::West => (-1, 0, 0),
-            MovementDirection::NorthEast => (0, 1, 0),
-            MovementDirection::NorthWest => (-1, 1, 0),
-            MovementDirection::SouthEast => (1, -1, 0),
-            MovementDirection::SouthWest => (0, -1, 0),
-            MovementDirection::Up => (0, 0, 1),
-            MovementDirection::Down => (0, 0, -1),
+            MovementDirection::NorthEast => (0, 0, 1),
+            MovementDirection::NorthWest => (-1, 0, 1),
+            MovementDirection::SouthEast => (1, 0, -1),
+            MovementDirection::SouthWest => (0, 0, -1),
+            MovementDirection::Up => (0, 1, 0),
+            MovementDirection::Down => (0, -1, 0),
         }
     }
 }

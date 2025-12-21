@@ -1,8 +1,9 @@
 use bevy::{prelude::*, window::WindowResolution};
+use bevy_water::{WaterPlugin, WaterSettings};
 
 use crate::systems::{
     camera::move_camera,
-    player::{add_player_bloom, player_controls},
+    player::player_controls,
     setup::setup,
     tiles::{colorize_tiles, set_tile_transform},
 };
@@ -13,6 +14,14 @@ mod systems;
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
+        .insert_resource(WaterSettings {
+            height: 0.3,
+            amplitude: 1.5,
+            alpha_mode: AlphaMode::Add,
+            water_quality: bevy_water::WaterQuality::High,
+            deep_color: Color::hsla(180.0, 1.0, 0.3, 1.0),
+            ..default()
+        })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Ahex".into(),
@@ -24,6 +33,7 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugins(WaterPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, (move_camera, colorize_tiles))
         .add_systems(Update, (set_tile_transform, player_controls).chain())

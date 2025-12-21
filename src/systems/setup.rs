@@ -1,5 +1,3 @@
-use std::f32::consts::TAU;
-
 use bevy::{
     asset::AssetServer,
     camera::Camera3d,
@@ -10,7 +8,7 @@ use bevy::{
         system::{Commands, Res},
     },
     light::DirectionalLight,
-    math::{Quat, Vec2, Vec3},
+    math::{Vec2, Vec3, VectorSpace},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
     scene::SceneRoot,
     transform::components::Transform,
@@ -23,31 +21,26 @@ use crate::components::{player::Player, tile::Tile, tile_coordinates::TileCoordi
 pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn hexagons
     for xyzt in [
-        (0, 1, 0, true),
         (0, 0, 0, true),
         (1, 0, 0, true),
         (2, 0, 0, true),
-        (3, 0, 0, false),
+        (3, 0, 0, true),
         (3, 0, 1, false),
-        (3, 0, 2, true),
-        (4, 0, 3, true),
-        (4, 0, 0, true),
-        (4, -1, -1, true),
-        (4, -2, -2, true),
-        (2, 1, 0, false),
-        (2, 1, 1, true),
-        (2, 2, 0, false),
-        (2, 2, 1, false),
+        (3, 1, 1, true),
+        (2, 0, 2, false),
+        (2, 1, 2, false),
         (2, 2, 2, true),
-        (1, 2, 0, false),
-        (1, 2, 1, false),
-        (1, 2, 2, false),
-        (1, 2, 3, true),
-        (0, 2, 0, false),
-        (0, 2, 1, false),
-        (0, 2, 2, false),
-        (0, 2, 3, false),
-        (0, 2, 4, true),
+        (1, 3, 3, true),
+        (1, 0, 3, true),
+        (0, 0, 3, true),
+        (-1, 0, 3, false),
+        (-1, 1, 3, false),
+        (-1, 2, 3, false),
+        (-1, 3, 3, false),
+        (-1, 4, 3, false),
+        (-1, 5, 3, true),
+        (-1, -1, 2, true),
+        (-2, -2, 3, true),
     ] {
         commands.spawn(create_hexagon(xyzt, &asset_server));
     }
@@ -57,14 +50,14 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Player {},
         SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
         TileCoordinates {
-            x: 1,
+            x: 0,
             y: 0,
             z: 0,
             movement_speed: 3.0,
             ..default()
         },
         Transform {
-            rotation: Quat::from_rotation_x(TAU / 4.0),
+            // rotation: Quat::from_rotation_x(TAU / 4.0),
             scale: Vec3::new(0.5, 0.5, 0.5),
             ..default()
         },
@@ -73,7 +66,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn a camera looking at the entities to show what's happening in this example.
     commands.spawn((
         Camera3d::default(),
-        Transform::from_xyz(0.0, -10.0, 20.0).looking_at(Vec3::new(0.0, 0.0, 0.0), Vec3::Y),
+        Transform::from_xyz(0.0, 18.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {
             intensity: 0.3,
@@ -99,7 +92,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             illuminance: 5000.0,
             ..default()
         },
-        Transform::from_xyz(-60.0, -10.0, 50.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(-60.0, 100.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 
@@ -113,9 +106,10 @@ fn create_hexagon(
     (
         Tile {
             color: Color::hsla(
-                (xyzt.0 * 60 + xyzt.1 * 30) as f32,
-                0.8,
-                0.6 + 0.1 * xyzt.2 as f32,
+                90.0,
+                // (xyzt.0 * 60 + xyzt.1 * 30) as f32,
+                0.8, // 0.8 for normal
+                (0.4 + 0.1 * xyzt.2 as f32).clamp(0.05, 1.0),
                 1.0,
             ),
         },
@@ -132,7 +126,7 @@ fn create_hexagon(
             tile_below_asset.clone()
         }),
         Transform {
-            rotation: Quat::from_rotation_x(TAU / 4.0),
+            // rotation: Quat::from_rotation_x(TAU / 4.0),
             scale: Vec3::new(1.0, 1.0, 1.0),
             ..default()
         },
