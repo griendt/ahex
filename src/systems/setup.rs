@@ -16,7 +16,7 @@ use bevy::{
 };
 use bevy_gltf::GltfAssetLabel;
 
-use crate::components::{tile::Tile, tile_coordinates::TileCoordinates};
+use crate::components::{player::Player, tile::Tile, tile_coordinates::TileCoordinates};
 
 pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn hexagons
@@ -52,12 +52,14 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn player on top of somewhere
     commands.spawn((
+        Player {},
         SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("player.glb"))),
         TileCoordinates {
             x: 1,
             y: 0,
             z: 0,
-            is_on_top: true,
+            movement_speed: 3.0,
+            ..default()
         },
         Transform {
             rotation: Quat::from_rotation_x(TAU / 4.0),
@@ -106,6 +108,7 @@ fn create_hexagon(
             y: xyzt.1,
             z: xyzt.2,
             is_on_top: xyzt.3,
+            ..default()
         },
         SceneRoot(if xyzt.3 {
             tile_asset.clone()
