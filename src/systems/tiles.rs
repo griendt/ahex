@@ -44,6 +44,6 @@ pub(crate) fn set_tile_transform(query: Query<(&mut Transform, &TileCoordinates)
         transform.translation.y = (tile.y as f32) * 1.5;
 
         // A tile's width is 0.2 so if an object is supposed to be on top of the tile, grant it +0.2 on the z-axis.
-        transform.translation.z = 0.4 * tile.z as f32 + if tile.is_on_top { 0.2 } else { 0.0 };
+        transform.translation.z = 0.8 * tile.z as f32 + if tile.is_on_top { 0.2 } else { 0.0 };
     }
 }
