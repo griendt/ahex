@@ -4,12 +4,14 @@ use bevy::{
     asset::AssetServer,
     camera::Camera3d,
     color::Color,
+    core_pipeline::tonemapping::Tonemapping,
     ecs::{
         bundle::Bundle,
         system::{Commands, Res},
     },
     light::DirectionalLight,
-    math::{Quat, Vec3},
+    math::{Quat, Vec2, Vec3},
+    post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
     scene::SceneRoot,
     transform::components::Transform,
     utils::default,
@@ -53,7 +55,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn player on top of somewhere
     commands.spawn((
         Player {},
-        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("player.glb"))),
+        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
         TileCoordinates {
             x: 1,
             y: 0,
@@ -63,7 +65,7 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Transform {
             rotation: Quat::from_rotation_x(TAU / 4.0),
-            scale: Vec3::new(0.5, 1.0, 0.5),
+            scale: Vec3::new(0.5, 0.5, 0.5),
             ..default()
         },
     ));
@@ -72,6 +74,20 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(0.0, -10.0, 20.0).looking_at(Vec3::new(0.0, 0.0, 0.0), Vec3::Y),
+        Tonemapping::TonyMcMapface,
+        Bloom {
+            intensity: 0.3,
+            low_frequency_boost: 0.9,
+            low_frequency_boost_curvature: 0.85,
+            high_pass_frequency: 0.5,
+            prefilter: BloomPrefilter {
+                threshold: 0.0,
+                threshold_softness: 0.0,
+            },
+            composite_mode: BloomCompositeMode::EnergyConserving,
+            max_mip_dimension: 512,
+            scale: Vec2::ONE,
+        },
     ));
 
     // Add a light source so we can see clearly.

@@ -28,6 +28,7 @@ pub(crate) fn colorize_tiles(
                     // TODO: do not create a new material each time
                     let mut new_material = material.clone();
                     new_material.base_color = tile.color;
+                    // new_material.emissive = LinearRgba::rgb(0.01, 0.01, 0.01);
 
                     commands
                         .entity(descendant)

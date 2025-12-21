@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::WindowResolution};
 
 use crate::systems::{
     camera::move_camera,
-    player::player_controls,
+    player::{add_player_bloom, player_controls},
     setup::setup,
     tiles::{colorize_tiles, set_tile_transform},
 };
@@ -25,7 +25,7 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (move_camera, colorize_tiles))
+        .add_systems(Update, (move_camera, colorize_tiles, add_player_bloom))
         .add_systems(Update, (set_tile_transform, player_controls).chain())
         .run();
 }
