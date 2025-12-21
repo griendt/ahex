@@ -3,6 +3,7 @@ use bevy_gltf::GltfMaterialName;
 
 use crate::components::{
     player::Player,
+    tile::Tile,
     tile_coordinates::{MovementDirection, TileCoordinates},
 };
 
@@ -38,7 +39,8 @@ pub(crate) fn add_player_bloom(
 }
 
 pub(crate) fn player_controls(
-    players: Query<(&mut Player, &mut TileCoordinates)>,
+    players: Query<(&mut Player, &mut TileCoordinates), Without<Tile>>,
+    tiles: Query<(&Tile, &TileCoordinates)>,
     keys: Res<ButtonInput<KeyCode>>,
     timer: Res<Time>,
 ) {
@@ -51,7 +53,6 @@ pub(crate) fn player_controls(
             continue;
         }
 
-        // TODO: Check if target field is not occupied with anything solid.
         if keys.pressed(KeyCode::KeyA) {
             player.1.movement_direction = Some(MovementDirection::West);
             player.1.movement_animation_percentage = Some(0.0);
@@ -75,6 +76,29 @@ pub(crate) fn player_controls(
         if keys.pressed(KeyCode::KeyX) {
             player.1.movement_direction = Some(MovementDirection::SouthEast);
             player.1.movement_animation_percentage = Some(0.0);
+        }
+
+        // Abort moving if there is no tile to move to.
+        // TODO: Improve this collision detection (walls, other stuff in the future).
+        // Movement is currently allowed if there is a tile-top at the destination or below it.
+        if let Some(direction) = player.1.movement_direction.clone() {
+            let direction_offset = direction.get_tile_coordinate_offset();
+            let target_coordinate = (
+                player.1.x + direction_offset.0,
+                player.1.y + direction_offset.1,
+                player.1.z + direction_offset.2,
+            );
+
+            if !tiles.iter().any(|tile| {
+                tile.1.is_on_top
+                    && tile.1.x == target_coordinate.0
+                    && tile.1.y == target_coordinate.1
+                    && tile.1.z <= target_coordinate.2
+            }) {
+                // Character can't go here; a tile top must be here or below it.
+                player.1.movement_direction = None;
+                player.1.movement_animation_percentage = None;
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (move_camera, colorize_tiles, add_player_bloom))
+        .add_systems(Update, (move_camera, colorize_tiles))
         .add_systems(Update, (set_tile_transform, player_controls).chain())
         .run();
 }
