@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
 
-use crate::components::{
-    tile::Tile,
-    tile_coordinates::{MovementDirection, TileCoordinates},
-};
+use crate::components::{tile::Tile, tile_coordinates::TileCoordinates};
 
 pub(crate) fn colorize_tiles(
     mut commands: Commands,

@@ -7,7 +7,7 @@ use crate::components::{
     tile_coordinates::{MovementDirection, TileCoordinates},
 };
 
-const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(3.0, 1.0, 1.0);
+const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(4.0, 0.0, 4.0);
 
 pub(crate) fn add_player_bloom(
     mut commands: Commands,
@@ -18,7 +18,7 @@ pub(crate) fn add_player_bloom(
 ) {
     for (entity, _tile) in &query {
         for descendant in children.iter_descendants(entity) {
-            let Ok((id, material_name)) = mesh_materials.get(descendant) else {
+            let Ok((id, _material_name)) = mesh_materials.get(descendant) else {
                 continue;
             };
 

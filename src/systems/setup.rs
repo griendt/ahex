@@ -8,7 +8,7 @@ use bevy::{
         system::{Commands, Res},
     },
     light::DirectionalLight,
-    math::{Vec2, Vec3, VectorSpace},
+    math::{Vec2, Vec3},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
     scene::SceneRoot,
     transform::components::Transform,
@@ -69,24 +69,21 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Camera3d::default(),
         CameraAngle {
-            x: 0,
-            y: 18,
-            z: 12,
             rotation_speed: 3.0,
             ..default()
         },
         Transform::from_xyz(0.0, 18.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {
-            intensity: 0.3,
-            low_frequency_boost: 0.9,
-            low_frequency_boost_curvature: 0.85,
+            intensity: 0.25,
+            low_frequency_boost: 0.99,
+            low_frequency_boost_curvature: 0.5,
             high_pass_frequency: 0.5,
             prefilter: BloomPrefilter {
                 threshold: 0.0,
                 threshold_softness: 0.0,
             },
-            composite_mode: BloomCompositeMode::EnergyConserving,
+            composite_mode: BloomCompositeMode::Additive,
             max_mip_dimension: 512,
             scale: Vec2::ONE,
         },
