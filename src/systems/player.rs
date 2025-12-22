@@ -71,27 +71,27 @@ pub(crate) fn player_controls(
             continue;
         }
 
-        if keys.pressed(KeyCode::KeyA) {
+        if keys.just_pressed(KeyCode::KeyA) {
             player.1.movement_direction = Some(MovementDirection::West);
             player.1.movement_animation_percentage = Some(0.0);
         }
-        if keys.pressed(KeyCode::KeyD) {
+        if keys.just_pressed(KeyCode::KeyD) {
             player.1.movement_direction = Some(MovementDirection::East);
             player.1.movement_animation_percentage = Some(0.0);
         }
-        if keys.pressed(KeyCode::KeyW) {
+        if keys.just_pressed(KeyCode::KeyW) {
             player.1.movement_direction = Some(MovementDirection::NorthWest);
             player.1.movement_animation_percentage = Some(0.0);
         }
-        if keys.pressed(KeyCode::KeyE) {
+        if keys.just_pressed(KeyCode::KeyE) {
             player.1.movement_direction = Some(MovementDirection::NorthEast);
             player.1.movement_animation_percentage = Some(0.0);
         }
-        if keys.pressed(KeyCode::KeyZ) {
+        if keys.just_pressed(KeyCode::KeyZ) {
             player.1.movement_direction = Some(MovementDirection::SouthWest);
             player.1.movement_animation_percentage = Some(0.0);
         }
-        if keys.pressed(KeyCode::KeyX) {
+        if keys.just_pressed(KeyCode::KeyX) {
             player.1.movement_direction = Some(MovementDirection::SouthEast);
             player.1.movement_animation_percentage = Some(0.0);
         }
@@ -110,8 +110,8 @@ pub(crate) fn player_controls(
             if !tiles.iter().any(|tile| {
                 tile.1.is_on_top
                     && tile.1.x == target_coordinate.0
-                    && tile.1.y == target_coordinate.1
-                    && tile.1.z <= target_coordinate.2
+                    && tile.1.y <= target_coordinate.1
+                    && tile.1.z == target_coordinate.2
             }) {
                 // Character can't go here; a tile top must be here or below it.
                 player.1.movement_direction = None;

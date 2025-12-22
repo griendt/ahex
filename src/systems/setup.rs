@@ -50,10 +50,10 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Player {},
         SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
         TileCoordinates {
-            x: 0,
-            y: 0,
-            z: 0,
-            movement_speed: 3.0,
+            x: 1,
+            y: 6,
+            z: 3,
+            movement_speed: 5.0,
             ..default()
         },
         Transform {

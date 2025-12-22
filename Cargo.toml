@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.17.3", features = ["dynamic_linking", "experimental_pbr_pcss", "jpeg"] }
+bevy = { version = "0.17.3", features = ["experimental_pbr_pcss", "jpeg"] }
 bevy_gltf = "0.17.3"
 bevy_water = "0.17.0"
 

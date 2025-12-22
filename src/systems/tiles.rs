@@ -71,9 +71,9 @@ pub(crate) fn set_tile_transform(query: Query<(&mut Transform, &mut TileCoordina
         // Display the entity percentually towards the destination coordinates, if animating.
         if animation_percentage < 1.0 {
             transform.translation.x +=
-                animation_percentage * (sqrt3 * (offset.0 as f32 + offset.1 as f32 / 2f32) as f32);
-            transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
+                animation_percentage * (sqrt3 * (offset.0 as f32 + offset.2 as f32 / 2f32) as f32);
             transform.translation.y += animation_percentage * (0.8 * offset.1 as f32);
+            transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
         }
     }
 }
