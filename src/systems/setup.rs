@@ -16,7 +16,9 @@ use bevy::{
 };
 use bevy_gltf::GltfAssetLabel;
 
-use crate::components::{player::Player, tile::Tile, tile_coordinates::TileCoordinates};
+use crate::components::{
+    camera::CameraAngle, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
+};
 
 pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn hexagons
@@ -66,6 +68,13 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn a camera looking at the entities to show what's happening in this example.
     commands.spawn((
         Camera3d::default(),
+        CameraAngle {
+            x: 0,
+            y: 18,
+            z: 12,
+            rotation_speed: 3.0,
+            ..default()
+        },
         Transform::from_xyz(0.0, 18.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {

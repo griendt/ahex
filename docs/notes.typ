@@ -78,7 +78,7 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
 
 = Mechanics
 - [x] The camera can rotate, so that the player can see behind tall objects.
-- [ ] The camera should rotate only in intervals of $pi/3$ radians at a time, so that the hexagons always end up looking the same. Of course this transition should be fluent.
+- [x] The camera should rotate only in intervals of $pi/3$ radians at a time, so that the hexagons always end up looking the same. Of course this transition should be fluent.
 - [ ] The controls (`W/E/A/D/Z/X`) should adapt based on the angle of the camera. Otherwise controls are too confusing for the player if the camera is rotated.
 - [ ] The player should be able to restart a level using some button, remote from the usual controls. It could be a combination like `Ctrl+R`.
   - [ ] If a level has become unwinnable (due to the player or the _star_ falling into the water), the game should hint to use this restart combination.
