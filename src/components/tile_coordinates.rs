@@ -1,10 +1,11 @@
-use bevy::ecs::component::Component;
+use bevy::{ecs::component::Component, math::Vec3};
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub(crate) struct TileCoordinates {
     pub(crate) y: isize,
     pub(crate) x: isize,
     pub(crate) z: isize,
+    pub(crate) visual_offset: Vec3,
     pub(crate) is_on_top: bool,
     pub(crate) movement_direction: Option<MovementDirection>,
     pub(crate) movement_animation_percentage: Option<f32>,
@@ -18,6 +19,7 @@ impl Default for TileCoordinates {
             x: 0,
             y: 0,
             z: 0,
+            visual_offset: Vec3::ZERO,
             is_on_top: true,
             movement_direction: None,
             movement_animation_percentage: None,
@@ -27,7 +29,7 @@ impl Default for TileCoordinates {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum MovementDirection {
     NorthWest,
     NorthEast,
@@ -35,6 +37,7 @@ pub(crate) enum MovementDirection {
     SouthEast,
     SouthWest,
     West,
+    #[allow(unused)]
     Up,
     Down,
 }

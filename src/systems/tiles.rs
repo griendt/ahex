@@ -72,5 +72,8 @@ pub(crate) fn set_tile_transform(query: Query<(&mut Transform, &mut TileCoordina
             transform.translation.y += animation_percentage * (0.8 * offset.1 as f32);
             transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
         }
+
+        // Apply any further visual offset
+        transform.translation += tile.visual_offset;
     }
 }

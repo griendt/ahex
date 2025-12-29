@@ -2,12 +2,13 @@ use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
 
 use crate::components::{
+    goal::Goal,
     player::Player,
     tile::Tile,
     tile_coordinates::{MovementDirection, TileCoordinates},
 };
 
-const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(4.0, 0.0, 4.0);
+const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(1.0, 0.0, 1.0);
 
 pub(crate) fn add_player_bloom(
     mut commands: Commands,
@@ -33,6 +34,26 @@ pub(crate) fn add_player_bloom(
                 commands
                     .entity(descendant)
                     .insert(MeshMaterial3d(asset_materials.add(new_material)));
+            }
+        }
+    }
+}
+
+pub(crate) fn collect_goals(
+    mut commands: Commands,
+    players: Query<(&Player, &TileCoordinates), Without<Goal>>,
+    goals: Query<(&Goal, &TileCoordinates, Entity), Without<Player>>,
+) {
+    for player in players {
+        if player.1.movement_animation_percentage.is_some() {
+            // Allow movement to finish first
+            continue;
+        }
+
+        for goal in goals {
+            if player.1.x == goal.1.x && player.1.y == goal.1.y && player.1.z == goal.1.z {
+                // TODO: awesome explosive animation?
+                commands.entity(goal.2).despawn();
             }
         }
     }

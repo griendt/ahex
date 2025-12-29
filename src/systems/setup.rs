@@ -1,13 +1,13 @@
 use bevy::{
     asset::AssetServer,
     camera::Camera3d,
-    color::Color,
+    color::{Color, palettes::css::YELLOW},
     core_pipeline::tonemapping::Tonemapping,
     ecs::{
         bundle::Bundle,
         system::{Commands, Res},
     },
-    light::DirectionalLight,
+    light::{DirectionalLight, PointLight},
     math::{Vec2, Vec3},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
     scene::SceneRoot,
@@ -17,7 +17,7 @@ use bevy::{
 use bevy_gltf::GltfAssetLabel;
 
 use crate::components::{
-    camera::CameraAngle, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
+    camera::CameraAngle, goal::Goal, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
 };
 
 pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -59,8 +59,30 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         Transform {
-            // rotation: Quat::from_rotation_x(TAU / 4.0),
             scale: Vec3::new(0.5, 0.5, 0.5),
+            ..default()
+        },
+    ));
+
+    // Spawn a goal
+    commands.spawn((
+        Goal {},
+        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("goal.glb"))),
+        TileCoordinates {
+            x: 1,
+            y: 0,
+            z: 0,
+            visual_offset: Vec3::new(0.0, 1.0, 0.0),
+            ..default()
+        },
+        Transform {
+            scale: Vec3::new(0.5, 0.5, 0.5),
+            ..default()
+        },
+        PointLight {
+            intensity: 500_000.0,
+            color: YELLOW.into(),
+            shadows_enabled: true,
             ..default()
         },
     ));

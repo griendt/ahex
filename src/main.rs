@@ -3,7 +3,8 @@ use bevy_water::{WaterPlugin, WaterSettings};
 
 use crate::systems::{
     camera::move_camera,
-    player::{add_player_bloom, player_controls},
+    goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
+    player::{add_player_bloom, collect_goals, player_controls},
     setup::setup,
     tiles::{colorize_tiles, set_tile_transform},
 };
@@ -35,7 +36,14 @@ fn main() {
         }))
         .add_plugins(WaterPlugin)
         .add_systems(Startup, setup)
-        .add_systems(Update, (move_camera, colorize_tiles, add_player_bloom))
+        .add_systems(
+            Update,
+            (add_player_bloom, add_goal_bloom, vary_goal_intensity),
+        )
+        .add_systems(
+            Update,
+            (move_camera, rotate_goal, colorize_tiles, collect_goals),
+        )
         .add_systems(Update, (set_tile_transform, player_controls).chain())
         .run();
 }
