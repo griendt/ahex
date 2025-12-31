@@ -25,6 +25,9 @@ pub struct LevelEntityMarker;
 #[derive(Component)]
 pub struct HelpTextMarker;
 
+#[derive(Component)]
+pub struct LevelCompleteTextMarker;
+
 #[derive(Component, Deserialize, Debug)]
 pub struct LevelParser {
     pub metadata: LevelMetadata,

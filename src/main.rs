@@ -5,7 +5,7 @@ use bevy_water::{WaterPlugin, WaterSettings};
 use crate::systems::{
     camera::move_camera,
     goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
-    level::{build_level, restart_level},
+    level::{build_level, restart_level, show_level_complete},
     player::{add_player_bloom, collect_goals, player_controls},
     setup::{setup, setup_effects},
     tiles::{colorize_tiles, set_tile_transform},
@@ -55,6 +55,7 @@ fn main() {
                 collect_goals,
                 set_tile_transform,
                 restart_level,
+                show_level_complete,
                 player_controls.after(set_tile_transform),
             ),
         )
