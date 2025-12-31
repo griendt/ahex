@@ -5,6 +5,7 @@ use bevy_water::{WaterPlugin, WaterSettings};
 use crate::systems::{
     camera::move_camera,
     goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
+    level::{build_level, restart_level},
     player::{add_player_bloom, collect_goals, player_controls},
     setup::{setup, setup_effects},
     tiles::{colorize_tiles, set_tile_transform},
@@ -13,7 +14,6 @@ use crate::systems::{
 use crate::resources::effects::GlobalEffects;
 
 mod components;
-mod level;
 mod resources;
 mod systems;
 
@@ -26,7 +26,7 @@ fn main() {
             amplitude: 1.5,
             alpha_mode: AlphaMode::Add,
             water_quality: bevy_water::WaterQuality::Basic,
-            deep_color: Color::hsla(180.0, 1.0, 0.3, 1.0),
+            deep_color: Color::hsla(180.0, 1.0, 0.6, 1.0),
             ..default()
         })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -42,7 +42,7 @@ fn main() {
         }))
         .add_plugins(WaterPlugin)
         .add_plugins(HanabiPlugin)
-        .add_systems(Startup, (setup, setup_effects))
+        .add_systems(Startup, (setup, setup_effects, build_level.after(setup)))
         .add_systems(
             Update,
             (
@@ -53,8 +53,10 @@ fn main() {
                 rotate_goal,
                 colorize_tiles,
                 collect_goals,
+                set_tile_transform,
+                restart_level,
+                player_controls.after(set_tile_transform),
             ),
         )
-        .add_systems(Update, (set_tile_transform, player_controls).chain())
         .run();
 }

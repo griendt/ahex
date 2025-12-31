@@ -1,7 +1,10 @@
 use bevy::{
     asset::AssetServer,
     color::{Color, palettes::css::YELLOW},
-    ecs::system::{Commands, Res},
+    ecs::{
+        component::Component,
+        system::{Commands, Res},
+    },
     light::PointLight,
     log::info,
     math::Vec3,
@@ -16,7 +19,10 @@ use crate::components::{
     goal::Goal, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
 };
 
-#[derive(Deserialize, Debug)]
+#[derive(Component)]
+pub struct LevelEntityMarker;
+
+#[derive(Component, Deserialize, Debug)]
 pub struct LevelParser {
     pub metadata: LevelMetadata,
     pub layers: Vec<LevelLayer>,
@@ -167,6 +173,7 @@ impl LevelParser {
     ) {
         commands.spawn((
             Player {},
+            LevelEntityMarker,
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
             TileCoordinates {
                 x: x,
@@ -192,6 +199,7 @@ impl LevelParser {
     ) {
         commands.spawn((
             Goal {},
+            LevelEntityMarker,
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("goal.glb"))),
             TileCoordinates {
                 x: x,
@@ -231,6 +239,7 @@ impl LevelParser {
             Tile {
                 color: Color::hsla(90.0, 0.8, (0.4 + 0.1 * y as f32).clamp(0.05, 1.0), 1.0),
             },
+            LevelEntityMarker,
             TileCoordinates {
                 x: x,
                 y: y,

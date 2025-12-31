@@ -17,13 +17,14 @@ use bevy_hanabi::{
 };
 
 use crate::{
-    components::camera::CameraAngle, level::LevelParser, resources::effects::GlobalEffects,
+    components::{camera::CameraAngle, level::LevelParser},
+    resources::effects::GlobalEffects,
 };
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup(mut commands: Commands) {
     let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/2.toml")).unwrap();
-    parsed_level.render_level(&mut commands, &asset_server);
 
+    commands.spawn(parsed_level);
     commands.spawn((
         Camera3d::default(),
         CameraAngle {
@@ -34,7 +35,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Tonemapping::TonyMcMapface,
         Bloom {
             intensity: 0.25,
-            low_frequency_boost: 0.99,
+            low_frequency_boost: 0.95,
             low_frequency_boost_curvature: 0.5,
             high_pass_frequency: 0.5,
             prefilter: BloomPrefilter {
@@ -52,10 +53,10 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             shadows_enabled: true,
             soft_shadow_size: None,
             affects_lightmapped_mesh_diffuse: false,
-            illuminance: 1600.0,
+            illuminance: 2000.0,
             ..default()
         },
-        Transform::from_xyz(-60.0, 100.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(-60.0, 100.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 
