@@ -29,7 +29,7 @@ impl Default for TileCoordinates {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MovementDirection {
     NorthWest,
     NorthEast,
@@ -54,5 +54,25 @@ impl MovementDirection {
             MovementDirection::Up => (0, 1, 0),
             MovementDirection::Down => (0, -1, 0),
         }
+    }
+
+    pub fn rotate_y(&self, num_rotations: isize) -> Self {
+        let sorted_directions = [
+            Self::East,
+            Self::SouthEast,
+            Self::SouthWest,
+            Self::West,
+            Self::NorthWest,
+            Self::NorthEast,
+        ];
+
+        match sorted_directions.iter().position(|item| self == item) {
+            None => self,
+            Some(value) => {
+                let new_index = (value as isize + num_rotations).rem_euclid(6);
+                &sorted_directions[new_index as usize]
+            }
+        }
+        .clone()
     }
 }

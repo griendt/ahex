@@ -64,7 +64,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             high_pass_frequency: 0.5,
             prefilter: BloomPrefilter {
                 threshold: 0.0,
-                threshold_softness: 0.0,
+                threshold_softness: 1.0,
             },
             composite_mode: BloomCompositeMode::Additive,
             max_mip_dimension: 512,

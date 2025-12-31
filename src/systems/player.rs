@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
-use bevy_hanabi::{EffectAsset, ParticleEffect};
+use bevy_hanabi::ParticleEffect;
 
 use crate::{
     components::{
+        camera::CameraAngle,
         goal::Goal,
         player::Player,
         tile::Tile,
@@ -70,6 +71,7 @@ pub fn collect_goals(
 pub fn player_controls(
     players: Query<(&mut Player, &mut TileCoordinates), Without<Tile>>,
     tiles: Query<(&Tile, &TileCoordinates)>,
+    camera: Single<&CameraAngle>,
     keys: Res<ButtonInput<KeyCode>>,
     timer: Res<Time>,
 ) {
@@ -101,27 +103,33 @@ pub fn player_controls(
         }
 
         if keys.just_pressed(KeyCode::KeyA) {
-            player.1.movement_direction = Some(MovementDirection::West);
+            player.1.movement_direction =
+                Some(MovementDirection::West.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
         if keys.just_pressed(KeyCode::KeyD) {
-            player.1.movement_direction = Some(MovementDirection::East);
+            player.1.movement_direction =
+                Some(MovementDirection::East.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
         if keys.just_pressed(KeyCode::KeyW) {
-            player.1.movement_direction = Some(MovementDirection::NorthWest);
+            player.1.movement_direction =
+                Some(MovementDirection::NorthWest.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
         if keys.just_pressed(KeyCode::KeyE) {
-            player.1.movement_direction = Some(MovementDirection::NorthEast);
+            player.1.movement_direction =
+                Some(MovementDirection::NorthEast.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
         if keys.just_pressed(KeyCode::KeyZ) {
-            player.1.movement_direction = Some(MovementDirection::SouthWest);
+            player.1.movement_direction =
+                Some(MovementDirection::SouthWest.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
         if keys.just_pressed(KeyCode::KeyX) {
-            player.1.movement_direction = Some(MovementDirection::SouthEast);
+            player.1.movement_direction =
+                Some(MovementDirection::SouthEast.rotate_y(camera.total_6th_rotations));
             player.1.movement_animation_percentage = Some(0.0);
         }
 
