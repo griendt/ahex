@@ -99,6 +99,7 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
 - [ ] Tiles may be _fragile_. After the player has stepped on it, it will crumble as soon as the player steps off it.
   - [ ] Some _fragile_ tiles might be rechargable.
 - [ ] _Crates_ are solid objects that the player can't traverse through, but can push. A push is only possible if the crate can occupy the target hex.
+  - [ ] _Crates_ could come in two variants: small hex and full hex. A full crate occupies the entire ground of the tile that it is on. These big crates cannot squeeze through pairs of pillars (like the pillbug in the game #link("https://en.wikipedia.org/wiki/Hive_(game)")[Hive]!
 - [ ] The player is only strong enough to push one _crate_ at a time (I think). A series of crates are therefore not pushable in the direction that they form a series in.
 - [ ] _Lasers_ block the player from moving through them, much like walls. Lasers extend across the entire level, until blocked by something solid.
   - [ ] _Lasers_ may be blocked by the player pushing a _crate_ into its path.
@@ -106,3 +107,15 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
   - [ ] _Trampolines_ could come in fixed or in _crate_-like variants (which can be moved). Note that for this, tile heights must be uniform!
   - [ ] If a player falls down flat on top of a _trampoline_, they can no longer move in any direction. This should trigger the restart hint.
   - [ ] Jumps should keep into account collisions. The jump might be canceled halfway if the player would otherwise hit a wall. This could cause the player to fall down early.
+= Level file format
+- [x] The format will be TOML. This is because it allows comments, is not indent-sensitive, has sensible types, and is supported by the `serde` crate.
+- [x] The format should be easily extendible. Everything should start in a section to allow for extension.
+- [x] Most levels will need only one layer of tiles (i.e. at most one tile at a given $y$ value). However, the format should allow for multiple layers in case a level will contain caves, stacked layers, and so on.
+- [x] The height map can be rectangular, and should map to corresponding $x z$-coordinates. The values of tiles can range from `0` to `9` by default. In practice tiles probably won't get higher than this.
+- [x] Tiles can be applied one or multiple sets of _modifiers_. Modifiers include:
+  - [x] Has a player on top of it
+  - [x] Has a goal on top of it
+  - [ ] Is slippery
+  - [ ] Is fragile
+  - [ ] Has a crate on top of it
+  - [ ] Is a trampoline

@@ -1,22 +1,15 @@
 use bevy::{
     asset::{AssetServer, Assets},
     camera::Camera3d,
-    color::{Color, palettes::css::YELLOW},
     core_pipeline::tonemapping::Tonemapping,
-    ecs::{
-        bundle::Bundle,
-        system::{Commands, Res, ResMut},
-    },
-    light::{AmbientLight, DirectionalLight, PointLight},
-    log::info,
+    ecs::system::{Commands, Res, ResMut},
+    light::DirectionalLight,
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
-    scene::SceneRoot,
     transform::components::Transform,
     utils::default,
 };
-use bevy_gltf::GltfAssetLabel;
 use bevy_hanabi::{
     AccelModifier, Attribute, ColorOverLifetimeModifier, EffectAsset, Gradient, Module,
     SetAttributeModifier, SetPositionSphereModifier, SetVelocitySphereModifier, ShapeDimension,
@@ -24,23 +17,20 @@ use bevy_hanabi::{
 };
 
 use crate::{
-    components::{camera::CameraAngle, tile::Tile, tile_coordinates::TileCoordinates},
-    level::LevelParser,
-    resources::effects::GlobalEffects,
+    components::camera::CameraAngle, level::LevelParser, resources::effects::GlobalEffects,
 };
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/1.toml")).unwrap();
+    let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/2.toml")).unwrap();
     parsed_level.render_level(&mut commands, &asset_server);
 
-    // Spawn a camera looking at the entities to show what's happening in this example.
     commands.spawn((
         Camera3d::default(),
         CameraAngle {
             rotation_speed: 3.0,
             ..default()
         },
-        Transform::from_xyz(0.0, 18.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(0.0, 16.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {
             intensity: 0.25,
@@ -67,43 +57,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Transform::from_xyz(-60.0, 100.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
-}
-
-fn create_hexagon(
-    xyzt: (isize, isize, isize, bool),
-    asset_server: &Res<AssetServer>,
-) -> impl Bundle {
-    let tile_asset = asset_server.load(GltfAssetLabel::Scene(0).from_asset("tile.glb"));
-    let tile_below_asset = asset_server.load(GltfAssetLabel::Scene(0).from_asset("tile_below.glb"));
-
-    (
-        Tile {
-            color: Color::hsla(
-                90.0,
-                // (xyzt.0 * 60 + xyzt.1 * 30) as f32,
-                0.8, // 0.8 for normal
-                (0.4 + 0.1 * xyzt.2 as f32).clamp(0.05, 1.0),
-                1.0,
-            ),
-        },
-        TileCoordinates {
-            x: xyzt.0,
-            y: xyzt.1,
-            z: xyzt.2,
-            is_on_top: xyzt.3,
-            ..default()
-        },
-        SceneRoot(if xyzt.3 {
-            tile_asset.clone()
-        } else {
-            tile_below_asset.clone()
-        }),
-        Transform {
-            // rotation: Quat::from_rotation_x(TAU / 4.0),
-            scale: Vec3::new(1.0, 1.0, 1.0),
-            ..default()
-        },
-    )
 }
 
 pub fn setup_effects(

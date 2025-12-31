@@ -39,7 +39,7 @@ pub enum LevelMetadataBiome {
 pub struct LevelLayer {
     pub pillars: Option<bool>,
     pub height_map: String,
-    pub modifiers: String,
+    pub modifiers: Vec<String>,
 }
 
 impl LevelParser {
@@ -54,11 +54,16 @@ impl LevelParser {
                 .map(|line| line.chars().collect())
                 .collect();
 
-            let modifiers: Vec<Vec<char>> = layer
+            let modifier_maps: Vec<Vec<Vec<char>>> = layer
                 .modifiers
-                .trim()
-                .split('\n')
-                .map(|line| line.chars().collect())
+                .iter()
+                .map(|modifier_map| {
+                    modifier_map
+                        .trim()
+                        .split('\n')
+                        .map(|line| line.chars().collect())
+                        .collect()
+                })
                 .collect();
 
             for (row_index, row) in heights.iter().enumerate() {
@@ -81,35 +86,37 @@ impl LevelParser {
                         );
                     }
 
-                    let modifier = modifiers
-                        .iter()
-                        .nth(row_index)
-                        .expect("Modifier map has fewer rows than height map")
-                        .iter()
-                        .nth(col_index)
-                        .expect("Modifier map has fewer columns than height map");
+                    for modifier_map in &modifier_maps {
+                        let modifier = modifier_map
+                            .iter()
+                            .nth(row_index)
+                            .expect("Modifier map has fewer rows than height map")
+                            .iter()
+                            .nth(col_index)
+                            .expect("Modifier map has fewer columns than height map");
 
-                    match modifier {
-                        'P' => {
-                            self.get_player_entity(
-                                tile_xyz.0,
-                                tile_xyz.1,
-                                tile_xyz.2,
-                                commands,
-                                asset_server,
-                            );
-                        }
-                        'G' => {
-                            self.get_goal_entity(
-                                tile_xyz.0,
-                                tile_xyz.1,
-                                tile_xyz.2,
-                                commands,
-                                asset_server,
-                            );
-                        }
-                        _ => continue,
-                    };
+                        match modifier {
+                            'P' => {
+                                self.get_player_entity(
+                                    tile_xyz.0,
+                                    tile_xyz.1,
+                                    tile_xyz.2,
+                                    commands,
+                                    asset_server,
+                                );
+                            }
+                            'G' => {
+                                self.get_goal_entity(
+                                    tile_xyz.0,
+                                    tile_xyz.1,
+                                    tile_xyz.2,
+                                    commands,
+                                    asset_server,
+                                );
+                            }
+                            _ => continue,
+                        };
+                    }
                 }
             }
         }
@@ -188,9 +195,9 @@ impl LevelParser {
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("goal.glb"))),
             TileCoordinates {
                 x: x,
-                y: y - 1,
+                y: y,
                 z: z,
-                visual_offset: Vec3::new(0.0, 1.0, 0.0),
+                visual_offset: Vec3::new(0.0, 0.5, 0.0),
                 ..default()
             },
             Transform {
