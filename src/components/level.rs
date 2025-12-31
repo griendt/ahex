@@ -22,6 +22,9 @@ use crate::components::{
 #[derive(Component)]
 pub struct LevelEntityMarker;
 
+#[derive(Component)]
+pub struct HelpTextMarker;
+
 #[derive(Component, Deserialize, Debug)]
 pub struct LevelParser {
     pub metadata: LevelMetadata,

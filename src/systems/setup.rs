@@ -7,7 +7,12 @@ use bevy::{
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
+    text::TextFont,
     transform::components::Transform,
+    ui::{
+        Node, PositionType, px,
+        widget::{Text, TextShadow},
+    },
     utils::default,
 };
 use bevy_hanabi::{
@@ -17,14 +22,33 @@ use bevy_hanabi::{
 };
 
 use crate::{
-    components::{camera::CameraAngle, level::LevelParser},
+    components::{
+        camera::CameraAngle,
+        level::{HelpTextMarker, LevelParser},
+    },
     resources::effects::GlobalEffects,
 };
 
-pub fn setup(mut commands: Commands) {
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/2.toml")).unwrap();
 
     commands.spawn(parsed_level);
+    commands.spawn((
+        HelpTextMarker,
+        Text::new("- W/E/A/D/Z/X\n- Backspace\n- ←/→"),
+        TextFont {
+            font: asset_server.load("fonts/main.ttf"),
+            font_size: 48.0,
+            ..default()
+        },
+        TextShadow::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            top: px(20),
+            left: px(20),
+            ..default()
+        },
+    ));
     commands.spawn((
         Camera3d::default(),
         CameraAngle {

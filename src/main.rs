@@ -25,7 +25,7 @@ fn main() {
             height: 0.3,
             amplitude: 1.5,
             alpha_mode: AlphaMode::Add,
-            water_quality: bevy_water::WaterQuality::Basic,
+            water_quality: bevy_water::WaterQuality::High, // High or better for shadows
             deep_color: Color::hsla(180.0, 1.0, 0.6, 1.0),
             ..default()
         })
