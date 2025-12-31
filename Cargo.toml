@@ -6,7 +6,11 @@ edition = "2024"
 [dependencies]
 bevy = { version = "0.17.3", features = ["experimental_pbr_pcss", "jpeg"] }
 bevy_gltf = "0.17.3"
+bevy_hanabi = "0.17.0"
 bevy_water = "0.17.0"
+serde = "1.0.228"
+serde_toml = "0.0.1"
+toml = "0.9.10"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

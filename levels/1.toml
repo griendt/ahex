@@ -1,0 +1,14 @@
+[metadata]
+name = "Level 1"
+biome = "DAYLIGHT"
+
+[[layers]]
+pillars = true
+height_map = """
+111238
+101..0
+"""
+modifiers = """
+......
+G.P...
+""""

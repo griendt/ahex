@@ -1,16 +1,20 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
+use bevy_hanabi::{EffectAsset, ParticleEffect};
 
-use crate::components::{
-    goal::Goal,
-    player::Player,
-    tile::Tile,
-    tile_coordinates::{MovementDirection, TileCoordinates},
+use crate::{
+    components::{
+        goal::Goal,
+        player::Player,
+        tile::Tile,
+        tile_coordinates::{MovementDirection, TileCoordinates},
+    },
+    resources::effects::GlobalEffects,
 };
 
 const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(1.0, 0.0, 1.0);
 
-pub(crate) fn add_player_bloom(
+pub fn add_player_bloom(
     mut commands: Commands,
     query: Query<(Entity, &Player)>,
     children: Query<&Children>,
@@ -39,10 +43,11 @@ pub(crate) fn add_player_bloom(
     }
 }
 
-pub(crate) fn collect_goals(
+pub fn collect_goals(
     mut commands: Commands,
     players: Query<(&Player, &TileCoordinates), Without<Goal>>,
-    goals: Query<(&Goal, &TileCoordinates, Entity), Without<Player>>,
+    goals: Query<(&Goal, &TileCoordinates, &Transform, Entity), Without<Player>>,
+    effects: Res<GlobalEffects>,
 ) {
     for player in players {
         if player.1.movement_animation_percentage.is_some() {
@@ -52,14 +57,17 @@ pub(crate) fn collect_goals(
 
         for goal in goals {
             if player.1.x == goal.1.x && player.1.y == goal.1.y && player.1.z == goal.1.z {
-                // TODO: awesome explosive animation?
-                commands.entity(goal.2).despawn();
+                commands.entity(goal.3).despawn();
+                commands.spawn((
+                    ParticleEffect::new(effects.goal_explosion_effect.clone().unwrap()),
+                    goal.2.clone(),
+                ));
             }
         }
     }
 }
 
-pub(crate) fn player_controls(
+pub fn player_controls(
     players: Query<(&mut Player, &mut TileCoordinates), Without<Tile>>,
     tiles: Query<(&Tile, &TileCoordinates)>,
     keys: Res<ButtonInput<KeyCode>>,

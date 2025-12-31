@@ -1,91 +1,37 @@
 use bevy::{
-    asset::AssetServer,
+    asset::{AssetServer, Assets},
     camera::Camera3d,
     color::{Color, palettes::css::YELLOW},
     core_pipeline::tonemapping::Tonemapping,
     ecs::{
         bundle::Bundle,
-        system::{Commands, Res},
+        system::{Commands, Res, ResMut},
     },
-    light::{DirectionalLight, PointLight},
-    math::{Vec2, Vec3},
+    light::{AmbientLight, DirectionalLight, PointLight},
+    log::info,
+    math::{Vec2, Vec3, Vec4},
+    mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
     scene::SceneRoot,
     transform::components::Transform,
     utils::default,
 };
 use bevy_gltf::GltfAssetLabel;
-
-use crate::components::{
-    camera::CameraAngle, goal::Goal, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
+use bevy_hanabi::{
+    AccelModifier, Attribute, ColorOverLifetimeModifier, EffectAsset, Gradient, Module,
+    SetAttributeModifier, SetPositionSphereModifier, SetVelocitySphereModifier, ShapeDimension,
+    SpawnerSettings,
 };
 
-pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Spawn hexagons
-    for xyzt in [
-        (0, 0, 0, true),
-        (1, 0, 0, true),
-        (2, 0, 0, true),
-        (3, 0, 0, true),
-        (3, 0, 1, false),
-        (3, 1, 1, true),
-        (2, 0, 2, false),
-        (2, 1, 2, false),
-        (2, 2, 2, true),
-        (1, 3, 3, true),
-        (1, 0, 3, true),
-        (0, 0, 3, true),
-        (-1, 0, 3, false),
-        (-1, 1, 3, false),
-        (-1, 2, 3, false),
-        (-1, 3, 3, false),
-        (-1, 4, 3, false),
-        (-1, 5, 3, true),
-        (-1, -1, 2, true),
-        (-2, -2, 3, true),
-    ] {
-        commands.spawn(create_hexagon(xyzt, &asset_server));
-    }
+use crate::{
+    components::{camera::CameraAngle, tile::Tile, tile_coordinates::TileCoordinates},
+    level::LevelParser,
+    resources::effects::GlobalEffects,
+};
 
-    // Spawn player on top of somewhere
-    commands.spawn((
-        Player {},
-        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
-        TileCoordinates {
-            x: 1,
-            y: 6,
-            z: 3,
-            movement_speed: 5.0,
-            ..default()
-        },
-        Transform {
-            scale: Vec3::new(0.5, 0.5, 0.5),
-            ..default()
-        },
-    ));
-
-    // Spawn a goal
-    commands.spawn((
-        Goal {},
-        SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("goal.glb"))),
-        TileCoordinates {
-            x: 1,
-            y: 0,
-            z: 0,
-            visual_offset: Vec3::new(0.0, 1.0, 0.0),
-            ..default()
-        },
-        Transform {
-            scale: Vec3::new(0.5, 0.5, 0.5),
-            ..default()
-        },
-        PointLight {
-            intensity: 500_000.0,
-            color: YELLOW.into(),
-            shadows_enabled: true,
-            ..default()
-        },
-    ));
+pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/1.toml")).unwrap();
+    parsed_level.render_level(&mut commands, &asset_server);
 
     // Spawn a camera looking at the entities to show what's happening in this example.
     commands.spawn((
@@ -111,13 +57,12 @@ pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    // Add a light source so we can see clearly.
     commands.spawn((
         DirectionalLight {
             shadows_enabled: true,
             soft_shadow_size: None,
             affects_lightmapped_mesh_diffuse: false,
-            illuminance: 5000.0,
+            illuminance: 1600.0,
             ..default()
         },
         Transform::from_xyz(-60.0, 100.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -159,4 +104,77 @@ fn create_hexagon(
             ..default()
         },
     )
+}
+
+pub fn setup_effects(
+    mut effects: ResMut<GlobalEffects>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    assets: ResMut<AssetServer>,
+) {
+    // Define a color gradient from red to transparent black
+    let mut gradient = Gradient::new();
+    gradient.add_key(0.0, Vec4::new(1., 1., 0., 1.));
+    gradient.add_key(1.0, Vec4::new(0., 0., 0., 0.));
+
+    // Create a new expression module
+    let mut module = Module::default();
+
+    // On spawn, randomly initialize the position of the particle
+    // to be over the surface of a sphere of radius 2 units.
+    let init_pos = SetPositionSphereModifier {
+        center: module.lit(Vec3::ZERO),
+        radius: module.lit(0.5),
+        dimension: ShapeDimension::Surface,
+    };
+
+    // Also initialize a radial initial velocity to 6 units/sec
+    // away from the (same) sphere center.
+    let init_vel = SetVelocitySphereModifier {
+        center: module.lit(Vec3::ZERO),
+        speed: module.lit(4.),
+    };
+
+    // Initialize the total lifetime of the particle, that is
+    // the time for which it's simulated and rendered. This modifier
+    // is almost always required, otherwise the particles won't show.
+    let lifetime = module.lit(5.); // literal value "10.0"
+    let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
+
+    let init_size_attr = SetAttributeModifier {
+        attribute: Attribute::SIZE,
+        value: module.lit(0.1),
+    };
+
+    // Every frame, add a gravity-like acceleration downward
+    let accel = module.lit(Vec3::new(0., -2., 0.));
+    let update_accel = AccelModifier::new(accel);
+
+    let mesh = meshes.add(SphereMeshBuilder::new(0.2, SphereKind::Ico { subdivisions: 1 }).build());
+
+    // Create the effect asset
+    let effect = EffectAsset::new(
+        // Maximum number of particles alive at a time
+        32768,
+        // Spawn at a rate of 5 particles per second
+        SpawnerSettings::once(1000.0.into()),
+        // Move the expression module into the asset
+        module,
+    )
+    .with_name("GoalCollectEffect")
+    .init(init_pos)
+    .init(init_vel)
+    .init(init_size_attr)
+    .init(init_lifetime)
+    .update(update_accel)
+    .mesh(mesh)
+    // Render the particles with a color gradient over their
+    // lifetime. This maps the gradient key 0 to the particle spawn
+    // time, and the gradient key 1 to the particle death (10s).
+    .render(ColorOverLifetimeModifier {
+        gradient,
+        ..default()
+    });
+
+    // Insert into the asset system and save a handle for later use
+    effects.goal_explosion_effect = Some(assets.add(effect));
 }

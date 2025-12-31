@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::components::camera::{CameraAngle, RotationDirection};
 
-pub(crate) fn move_camera(
+pub fn move_camera(
     mut camera: Single<(&mut Transform, &mut CameraAngle)>,
     keys: Res<ButtonInput<KeyCode>>,
     timer: Res<Time>,

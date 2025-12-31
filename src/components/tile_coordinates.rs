@@ -1,16 +1,16 @@
 use bevy::{ecs::component::Component, math::Vec3};
 
 #[derive(Component, Debug)]
-pub(crate) struct TileCoordinates {
-    pub(crate) y: isize,
-    pub(crate) x: isize,
-    pub(crate) z: isize,
-    pub(crate) visual_offset: Vec3,
-    pub(crate) is_on_top: bool,
-    pub(crate) movement_direction: Option<MovementDirection>,
-    pub(crate) movement_animation_percentage: Option<f32>,
-    pub(crate) movement_speed: f32,
-    pub(crate) falling_speed: f32,
+pub struct TileCoordinates {
+    pub y: isize,
+    pub x: isize,
+    pub z: isize,
+    pub visual_offset: Vec3,
+    pub is_on_top: bool,
+    pub movement_direction: Option<MovementDirection>,
+    pub movement_animation_percentage: Option<f32>,
+    pub movement_speed: f32,
+    pub falling_speed: f32,
 }
 
 impl Default for TileCoordinates {
@@ -30,7 +30,7 @@ impl Default for TileCoordinates {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) enum MovementDirection {
+pub enum MovementDirection {
     NorthWest,
     NorthEast,
     East,
@@ -43,7 +43,7 @@ pub(crate) enum MovementDirection {
 }
 
 impl MovementDirection {
-    pub(crate) fn get_tile_coordinate_offset(&self) -> (isize, isize, isize) {
+    pub fn get_tile_coordinate_offset(&self) -> (isize, isize, isize) {
         match self {
             MovementDirection::East => (1, 0, 0),
             MovementDirection::West => (-1, 0, 0),

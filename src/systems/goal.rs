@@ -5,7 +5,7 @@ use crate::components::goal::Goal;
 
 const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(1.0, 1.0, 0.0);
 
-pub(crate) fn rotate_goal(query: Query<&mut Transform, With<Goal>>, timer: Res<Time>) {
+pub fn rotate_goal(query: Query<&mut Transform, With<Goal>>, timer: Res<Time>) {
     for mut goal in query {
         goal.rotate_local_x(timer.delta_secs());
         goal.rotate_local_y(timer.delta_secs() / 2.0);
@@ -13,7 +13,7 @@ pub(crate) fn rotate_goal(query: Query<&mut Transform, With<Goal>>, timer: Res<T
     }
 }
 
-pub(crate) fn add_goal_bloom(
+pub fn add_goal_bloom(
     mut commands: Commands,
     query: Query<(Entity, &Goal)>,
     children: Query<&Children>,
@@ -42,7 +42,7 @@ pub(crate) fn add_goal_bloom(
     }
 }
 
-pub(crate) fn vary_goal_intensity(query: Query<&mut PointLight, With<Goal>>, timer: Res<Time>) {
+pub fn vary_goal_intensity(query: Query<&mut PointLight, With<Goal>>, timer: Res<Time>) {
     for mut light in query {
         light.intensity = 300_000.0 + 200_000.0 * timer.elapsed_secs().sin();
     }

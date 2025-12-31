@@ -1,6 +1,6 @@
 use bevy::{color::Color, ecs::component::Component};
 
 #[derive(Component)]
-pub(crate) struct Tile {
-    pub(crate) color: Color,
+pub struct Tile {
+    pub color: Color,
 }

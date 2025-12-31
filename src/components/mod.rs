@@ -1,5 +1,5 @@
-pub(crate) mod camera;
-pub(crate) mod goal;
-pub(crate) mod player;
-pub(crate) mod tile;
-pub(crate) mod tile_coordinates;
+pub mod camera;
+pub mod goal;
+pub mod player;
+pub mod tile;
+pub mod tile_coordinates;

@@ -3,7 +3,7 @@ use bevy_gltf::GltfMaterialName;
 
 use crate::components::{tile::Tile, tile_coordinates::TileCoordinates};
 
-pub(crate) fn colorize_tiles(
+pub fn colorize_tiles(
     mut commands: Commands,
     query: Query<(Entity, &Tile)>,
     children: Query<&Children>,
@@ -36,7 +36,7 @@ pub(crate) fn colorize_tiles(
     }
 }
 
-pub(crate) fn set_tile_transform(query: Query<(&mut Transform, &mut TileCoordinates)>) {
+pub fn set_tile_transform(query: Query<(&mut Transform, &mut TileCoordinates)>) {
     let sqrt3 = 3f32.sqrt();
 
     for (mut transform, mut tile) in query {
