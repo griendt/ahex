@@ -22,17 +22,11 @@ use bevy_hanabi::{
 };
 
 use crate::{
-    components::{
-        camera::CameraAngle,
-        level::{HelpTextMarker, LevelParser},
-    },
+    components::{camera::CameraAngle, level::HelpTextMarker},
     resources::effects::GlobalEffects,
 };
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let parsed_level: LevelParser = toml::from_str(include_str!("../../levels/2.toml")).unwrap();
-
-    commands.spawn(parsed_level);
     commands.spawn((
         HelpTextMarker,
         Text::new("- W/E/A/D/Z/X\n- Backspace\n- ←/→"),

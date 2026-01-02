@@ -2,13 +2,16 @@ use bevy::{prelude::*, window::WindowResolution};
 use bevy_hanabi::HanabiPlugin;
 use bevy_water::{WaterPlugin, WaterSettings};
 
-use crate::systems::{
-    camera::move_camera,
-    goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
-    level::{build_level, restart_level, show_level_complete},
-    player::{add_player_bloom, collect_goals, player_controls},
-    setup::{setup, setup_effects},
-    tiles::{colorize_tiles, set_tile_transform},
+use crate::{
+    resources::levels::LevelResource,
+    systems::{
+        camera::move_camera,
+        goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
+        level::{build_level, go_to_next_level, restart_level, show_level_complete},
+        player::{add_player_bloom, collect_goals, player_controls},
+        setup::{setup, setup_effects},
+        tiles::{colorize_tiles, set_tile_transform},
+    },
 };
 
 use crate::resources::effects::GlobalEffects;
@@ -21,6 +24,9 @@ fn main() {
     App::new()
         .insert_resource(GlobalEffects::default())
         .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
+        .insert_resource(LevelResource {
+            current_level_number: 1,
+        })
         .insert_resource(WaterSettings {
             height: 0.3,
             amplitude: 1.5,
@@ -55,6 +61,7 @@ fn main() {
                 collect_goals,
                 set_tile_transform,
                 restart_level,
+                go_to_next_level,
                 show_level_complete,
                 player_controls.after(set_tile_transform),
             ),
