@@ -85,7 +85,7 @@ pub fn show_level_complete(
                 overflow: Overflow::visible(),
                 max_width: Val::Px(0.0),
                 left: Val::Percent(50.0),
-                top: Val::Percent(50.0),
+                top: Val::Percent(70.0),
                 ..default()
             },
             LevelEntityMarker,
