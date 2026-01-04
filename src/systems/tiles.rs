@@ -1,12 +1,17 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
 
-use crate::components::{
-    movement::Movement,
-    player::{Player, PlayerFinishedMoving},
-    tile::{MovementMap, Tile},
-    tile_coordinates::TileCoordinates,
+use crate::{
+    components::{
+        movement::Movement,
+        player::{Player, PlayerFinishedMoving},
+        tile::{MovementMap, Tile},
+        tile_coordinates::TileCoordinates,
+    },
+    resources::levels::LevelState,
 };
+
+use crate::resources::levels::LevelResource;
 
 pub fn colorize_tiles(
     mut commands: Commands,
@@ -41,11 +46,22 @@ pub fn colorize_tiles(
     }
 }
 
-pub fn apply_movement_map(
+pub fn set_level_state_to_processing_level_effects(
     _event: On<PlayerFinishedMoving>,
+    mut level: ResMut<LevelResource>,
+) {
+    level.level_state = LevelState::ProcessingLevelEffects;
+}
+
+pub fn apply_movement_map(
     query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap)>,
     timer: Res<Time>,
+    mut level: ResMut<LevelResource>,
 ) {
+    if !matches!(level.level_state, LevelState::ProcessingLevelEffects) {
+        return;
+    }
+
     let sqrt3 = 3f32.sqrt();
 
     for (mut transform, mut tile, mut movement_map) in query {
@@ -64,6 +80,9 @@ pub fn apply_movement_map(
             movement_map.index += 1;
             tile.movement_animation_percentage = None;
             info!("Finished a moveent map step");
+
+            // TODO: what if different entities finish at a different time?
+            level.level_state = LevelState::WaitingForPlayerInput;
         }
 
         // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
@@ -111,9 +130,11 @@ pub fn apply_player_movement(
 
                     movement.animation_percentage = 0.0;
                     commands.entity(entity).remove::<Movement>();
-                    commands.trigger(PlayerFinishedMoving {});
 
-                    info!("New coordinates are {}, {}, {}", tile.x, tile.y, tile.z);
+                    // Only trigger this event if it was not falling
+                    if movement.offset.y == 0.0 {
+                        commands.trigger(PlayerFinishedMoving {});
+                    }
                 }
             }
             None => {}

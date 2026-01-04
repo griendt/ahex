@@ -14,6 +14,3 @@ pub struct Movement {
     pub movement_speed: f32,
     pub animation_percentage: f32,
 }
-
-#[derive(Event)]
-pub struct MovementFinished {}

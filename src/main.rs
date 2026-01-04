@@ -13,7 +13,7 @@ use crate::{
         setup::{setup, setup_effects},
         tiles::{
             apply_movement_map, apply_player_movement, colorize_tiles,
-            set_transform_based_on_tile_coordinates,
+            set_level_state_to_processing_level_effects, set_transform_based_on_tile_coordinates,
         },
     },
 };
@@ -30,6 +30,7 @@ fn main() {
         .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
         .insert_resource(LevelResource {
             current_level_number: 1,
+            ..default()
         })
         .insert_resource(WaterSettings {
             height: 0.3,
@@ -77,8 +78,9 @@ fn main() {
                 update_the_sun,
                 player_controls.after(apply_player_movement),
                 set_transform_based_on_tile_coordinates,
+                apply_movement_map,
             ),
         )
-        .add_observer(apply_movement_map)
+        .add_observer(set_level_state_to_processing_level_effects)
         .run();
 }

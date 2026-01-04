@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     components::{
         goal::Goal,
-        level::{LevelCompleteTextMarker, LevelEntityMarker, LevelParser},
+        level::{Level, LevelCompleteTextMarker, LevelEntityMarker},
     },
     resources::levels::LevelResource,
 };
@@ -21,7 +21,7 @@ pub fn build_level(
 pub fn restart_level(
     mut commands: Commands,
     levels: Res<LevelResource>,
-    entities: Query<(&LevelEntityMarker, Entity), Without<LevelParser>>,
+    entities: Query<(&LevelEntityMarker, Entity), Without<Level>>,
     asset_server: Res<AssetServer>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {

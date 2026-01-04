@@ -22,7 +22,7 @@ use serde::Deserialize;
 
 use crate::components::{
     goal::Goal,
-    player::{Player, PlayerFinishedMoving},
+    player::Player,
     tile::{MovementMap, Tile},
     tile_coordinates::TileCoordinates,
 };
@@ -37,7 +37,7 @@ pub struct HelpTextMarker;
 pub struct LevelCompleteTextMarker;
 
 #[derive(Component, Deserialize, Debug)]
-pub struct LevelParser {
+pub struct Level {
     pub metadata: LevelMetadata,
     pub layers: Vec<LevelLayer>,
 }
@@ -64,7 +64,7 @@ pub struct LevelLayer {
     pub movement_maps: Option<Vec<Vec<(isize, isize, isize)>>>,
 }
 
-impl LevelParser {
+impl Level {
     pub fn render_level(&self, commands: &mut Commands, asset_server: &Res<AssetServer>) {
         if !self.metadata.help_text.is_empty() {
             commands.spawn((
@@ -181,7 +181,7 @@ impl LevelParser {
         // Fire this event so that stuff that normally occurs after each step,
         // also occurs before the first step. This puts tiles into place, starts
         // the first movements and so on.
-        commands.trigger(PlayerFinishedMoving {});
+        // commands.trigger(PlayerFinishedMoving {});
     }
 
     fn get_level_xz_offsets(&self) -> (isize, isize) {

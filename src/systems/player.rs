@@ -11,7 +11,10 @@ use crate::{
         tile::Tile,
         tile_coordinates::{MovementDirection, TileCoordinates},
     },
-    resources::effects::GlobalEffects,
+    resources::{
+        effects::GlobalEffects,
+        levels::{LevelResource, LevelState},
+    },
 };
 
 const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(1.0, 0.0, 1.0);
@@ -75,7 +78,12 @@ pub fn player_controls(
     tiles: Query<(&Tile, &TileCoordinates)>,
     camera: Single<&CameraAngle>,
     keys: Res<ButtonInput<KeyCode>>,
+    level: Res<LevelResource>,
 ) {
+    if !matches!(level.level_state, LevelState::WaitingForPlayerInput) {
+        return;
+    }
+
     for player in players {
         if player.2.is_some() {
             // If already moving, then movement cannot be altered
@@ -92,7 +100,7 @@ pub fn player_controls(
             commands.entity(player.3).insert(Movement {
                 animation_percentage: 0.0,
                 movement_speed: player.1.falling_speed,
-                offset: Vec3::new(0.0, 1.0, 0.0),
+                offset: Vec3::new(0.0, -1.0, 0.0),
             });
 
             continue;
