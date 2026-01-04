@@ -11,6 +11,8 @@ pub struct TileCoordinates {
     pub movement_animation_percentage: Option<f32>,
     pub movement_speed: f32,
     pub falling_speed: f32,
+    pub movement_map: Vec<(isize, isize, isize)>,
+    pub movement_map_index: usize,
 }
 
 impl Default for TileCoordinates {
@@ -25,6 +27,8 @@ impl Default for TileCoordinates {
             movement_animation_percentage: None,
             movement_speed: 1.0,
             falling_speed: 20.0,
+            movement_map: vec![],
+            movement_map_index: 0,
         }
     }
 }

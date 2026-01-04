@@ -58,6 +58,7 @@ pub struct LevelLayer {
     pub pillars: Option<bool>,
     pub height_map: String,
     pub modifiers: Vec<String>,
+    pub movement_maps: Option<Vec<Vec<(isize, isize, isize)>>>,
 }
 
 impl LevelParser {
@@ -104,6 +105,8 @@ impl LevelParser {
                 })
                 .collect();
 
+            let mut num_movement_maps_applied = 0;
+
             for (row_index, row) in heights.iter().enumerate() {
                 for (col_index, char) in row.iter().enumerate() {
                     let tile_xyz = (
@@ -112,17 +115,7 @@ impl LevelParser {
                         z_offset - row_index as isize,
                     );
 
-                    if *char != '.' {
-                        self.get_tile_entity(
-                            tile_xyz.0,
-                            tile_xyz.1,
-                            tile_xyz.2,
-                            true,
-                            layer.pillars.unwrap_or(false),
-                            commands,
-                            asset_server,
-                        );
-                    }
+                    let mut movement_map: Vec<(isize, isize, isize)> = vec![];
 
                     for modifier_map in &modifier_maps {
                         let modifier = modifier_map
@@ -152,8 +145,31 @@ impl LevelParser {
                                     asset_server,
                                 );
                             }
+                            'M' => {
+                                movement_map =
+                                    layer.movement_maps
+                                        .clone()
+                                        .expect("Movement map modifier found, but no movement maps specified")
+                                        .iter()
+                                        .nth(num_movement_maps_applied)
+                                        .expect("Too few movement maps specified")
+                                        .clone();
+                            }
                             _ => continue,
                         };
+                    }
+
+                    if *char != '.' {
+                        self.get_tile_entity(
+                            tile_xyz.0,
+                            tile_xyz.1,
+                            tile_xyz.2,
+                            true,
+                            layer.pillars.unwrap_or(false),
+                            movement_map,
+                            commands,
+                            asset_server,
+                        );
                     }
                 }
             }
@@ -260,6 +276,7 @@ impl LevelParser {
         z: isize,
         is_on_top: bool,
         is_pillar: bool,
+        movement_map: Vec<(isize, isize, isize)>,
         commands: &mut Commands,
         asset_server: &Res<AssetServer>,
     ) {
@@ -277,6 +294,7 @@ impl LevelParser {
                 y: y,
                 z: z,
                 is_on_top: is_on_top,
+                movement_map: movement_map.clone(),
                 ..default()
             },
             SceneRoot(if is_on_top {
@@ -290,7 +308,16 @@ impl LevelParser {
         commands.spawn(bundle);
 
         if y > 0 && is_pillar {
-            self.get_tile_entity(x, y - 1, z, false, is_pillar, commands, asset_server);
+            self.get_tile_entity(
+                x,
+                y - 1,
+                z,
+                false,
+                is_pillar,
+                movement_map,
+                commands,
+                asset_server,
+            );
         }
     }
 }

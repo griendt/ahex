@@ -10,7 +10,7 @@ height_map = """
 .00112
 001222
 """
-modifiers = ["""d
+modifiers = ["""
 ...P..
 ......
 ..G...
