@@ -2,16 +2,11 @@ use bevy::{
     asset::{AssetServer, Assets},
     camera::Camera3d,
     core_pipeline::tonemapping::Tonemapping,
-    ecs::system::{Commands, Res, ResMut},
+    ecs::system::{Commands, ResMut},
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
-    text::TextFont,
     transform::components::Transform,
-    ui::{
-        Node, PositionType, px,
-        widget::{Text, TextShadow},
-    },
     utils::default,
 };
 use bevy_hanabi::{
@@ -20,10 +15,7 @@ use bevy_hanabi::{
     SpawnerSettings,
 };
 
-use crate::{
-    components::{camera::CameraAngle, level::HelpTextMarker},
-    resources::effects::GlobalEffects,
-};
+use crate::{components::camera::CameraAngle, resources::effects::GlobalEffects};
 
 pub fn setup(mut commands: Commands) {
     commands.spawn((

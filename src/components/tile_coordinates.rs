@@ -43,16 +43,16 @@ pub enum MovementDirection {
 }
 
 impl MovementDirection {
-    pub fn get_tile_coordinate_offset(&self) -> (isize, isize, isize) {
+    pub fn get_tile_coordinate_offset(&self) -> Vec3 {
         match self {
-            MovementDirection::East => (1, 0, 0),
-            MovementDirection::West => (-1, 0, 0),
-            MovementDirection::NorthEast => (0, 0, 1),
-            MovementDirection::NorthWest => (-1, 0, 1),
-            MovementDirection::SouthEast => (1, 0, -1),
-            MovementDirection::SouthWest => (0, 0, -1),
-            MovementDirection::Up => (0, 1, 0),
-            MovementDirection::Down => (0, -1, 0),
+            MovementDirection::East => Vec3::new(1., 0., 0.),
+            MovementDirection::West => Vec3::new(-1., 0., 0.),
+            MovementDirection::NorthEast => Vec3::new(0., 0., 1.),
+            MovementDirection::NorthWest => Vec3::new(-1., 0., 1.),
+            MovementDirection::SouthEast => Vec3::new(1., 0., -1.),
+            MovementDirection::SouthWest => Vec3::new(0., 0., -1.),
+            MovementDirection::Up => Vec3::new(0., 1., 0.),
+            MovementDirection::Down => Vec3::new(0., -1., 0.),
         }
     }
 

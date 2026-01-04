@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
 
 use crate::components::{
-    player::Player,
+    movement::Movement,
+    player::{Player, PlayerFinishedMoving},
     tile::{MovementMap, Tile},
     tile_coordinates::TileCoordinates,
 };
@@ -41,6 +42,7 @@ pub fn colorize_tiles(
 }
 
 pub fn apply_movement_map(
+    _event: On<PlayerFinishedMoving>,
     query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap)>,
     timer: Res<Time>,
 ) {
@@ -90,31 +92,41 @@ pub fn apply_movement_map(
     }
 }
 
-// TODO: This resets immovable tiles' coordinates on every frame, this is not necessary
 pub fn apply_player_movement(
-    query: Query<(&mut Transform, &mut TileCoordinates), Without<MovementMap>>,
+    mut commands: Commands,
+    query: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
+    timer: Res<Time>,
+) {
+    for (mut tile, movement, entity) in query {
+        match movement {
+            Some(mut movement) => {
+                let animation_percentage = movement.animation_percentage;
+                movement.animation_percentage += movement.movement_speed * timer.delta_secs();
+
+                // If animation is finished, set the actual coordinates and stop animating.
+                if animation_percentage >= 1.0 {
+                    tile.x += movement.offset.x as isize;
+                    tile.y += movement.offset.y as isize;
+                    tile.z += movement.offset.z as isize;
+
+                    movement.animation_percentage = 0.0;
+                    commands.entity(entity).remove::<Movement>();
+                    commands.trigger(PlayerFinishedMoving {});
+
+                    info!("New coordinates are {}, {}, {}", tile.x, tile.y, tile.z);
+                }
+            }
+            None => {}
+        }
+    }
+}
+
+pub fn set_transform_based_on_tile_coordinates(
+    query: Query<(&mut Transform, &TileCoordinates, Option<&Movement>)>,
 ) {
     let sqrt3 = 3f32.sqrt();
 
-    for (mut transform, mut tile) in query {
-        // If the entity is currently moving, offset by the appropriate amount
-        let offset = tile
-            .movement_direction
-            .clone()
-            .map(|direction| direction.get_tile_coordinate_offset())
-            .unwrap_or_default();
-
-        let animation_percentage = tile.movement_animation_percentage.unwrap_or_default();
-
-        // If animation is finished, set the actual coordinates and stop animating.
-        if animation_percentage >= 1.0 {
-            tile.x += offset.0;
-            tile.y += offset.1;
-            tile.z += offset.2;
-            tile.movement_animation_percentage = None;
-            tile.movement_direction = None;
-        }
-
+    for (mut transform, tile, movement) in query {
         // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
         transform.translation.x = ((tile.x as f32) + (tile.z as f32) / 2f32) * sqrt3;
         transform.translation.z = (tile.z as f32) * -1.5;
@@ -123,11 +135,14 @@ pub fn apply_player_movement(
         transform.translation.y = 0.8 * tile.y as f32 + if tile.is_on_top { 0.6 } else { 0.0 };
 
         // Display the entity percentually towards the destination coordinates, if animating.
-        if animation_percentage < 1.0 {
-            transform.translation.x +=
-                animation_percentage * (sqrt3 * (offset.0 as f32 + offset.2 as f32 / 2f32) as f32);
-            transform.translation.y += animation_percentage * (0.8 * offset.1 as f32);
-            transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
+        match movement {
+            Some(movement) => {
+                transform.translation.x += movement.animation_percentage
+                    * (sqrt3 * (movement.offset.x + movement.offset.z / 2.0));
+                transform.translation.y += movement.animation_percentage * 0.8 * movement.offset.y;
+                transform.translation.z += movement.animation_percentage * -1.5 * movement.offset.z;
+            }
+            None => {}
         }
 
         // Apply any further visual offset

@@ -11,7 +11,10 @@ use crate::{
         lighting::{create_the_sun, update_the_sun},
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{setup, setup_effects},
-        tiles::{apply_movement_map, apply_player_movement, colorize_tiles},
+        tiles::{
+            apply_movement_map, apply_player_movement, colorize_tiles,
+            set_transform_based_on_tile_coordinates,
+        },
     },
 };
 
@@ -73,8 +76,9 @@ fn main() {
                 show_level_complete,
                 update_the_sun,
                 player_controls.after(apply_player_movement),
-                apply_movement_map,
+                set_transform_based_on_tile_coordinates,
             ),
         )
+        .add_observer(apply_movement_map)
         .run();
 }

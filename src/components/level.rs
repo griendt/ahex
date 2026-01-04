@@ -22,7 +22,7 @@ use serde::Deserialize;
 
 use crate::components::{
     goal::Goal,
-    player::Player,
+    player::{Player, PlayerFinishedMoving},
     tile::{MovementMap, Tile},
     tile_coordinates::TileCoordinates,
 };
@@ -177,6 +177,11 @@ impl LevelParser {
                 }
             }
         }
+
+        // Fire this event so that stuff that normally occurs after each step,
+        // also occurs before the first step. This puts tiles into place, starts
+        // the first movements and so on.
+        commands.trigger(PlayerFinishedMoving {});
     }
 
     fn get_level_xz_offsets(&self) -> (isize, isize) {
@@ -297,7 +302,6 @@ impl LevelParser {
                 y: y,
                 z: z,
                 is_on_top: is_on_top,
-                movement_speed: 1.0,
                 ..default()
             },
             SceneRoot(if is_on_top {

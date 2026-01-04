@@ -6,6 +6,7 @@ use crate::{
     components::{
         camera::CameraAngle,
         goal::Goal,
+        movement::Movement,
         player::Player,
         tile::Tile,
         tile_coordinates::{MovementDirection, TileCoordinates},
@@ -69,22 +70,14 @@ pub fn collect_goals(
 }
 
 pub fn player_controls(
-    players: Query<(&mut Player, &mut TileCoordinates), Without<Tile>>,
+    mut commands: Commands,
+    players: Query<(&Player, &TileCoordinates, Option<&mut Movement>, Entity), Without<Tile>>,
     tiles: Query<(&Tile, &TileCoordinates)>,
     camera: Single<&CameraAngle>,
     keys: Res<ButtonInput<KeyCode>>,
-    timer: Res<Time>,
 ) {
-    for mut player in players {
-        if let Some(value) = player.1.movement_animation_percentage {
-            let speed = match player.1.movement_direction {
-                Some(MovementDirection::Down) => player.1.falling_speed,
-                _ => player.1.movement_speed,
-            };
-
-            player.1.movement_animation_percentage =
-                Some((value + speed * timer.delta_secs()).clamp(0.0, 1.0));
-
+    for player in players {
+        if player.2.is_some() {
             // If already moving, then movement cannot be altered
             continue;
         }
@@ -96,64 +89,65 @@ pub fn player_controls(
                 && tile.1.z == player.1.z
         }) {
             // Player is not currently standing. Disable movement and start falling instead!
-            player.1.movement_direction = Some(MovementDirection::Down);
-            player.1.movement_animation_percentage = Some(0.0);
+            commands.entity(player.3).insert(Movement {
+                animation_percentage: 0.0,
+                movement_speed: player.1.falling_speed,
+                offset: Vec3::new(0.0, 1.0, 0.0),
+            });
 
             continue;
         }
 
+        let mut movement_direction: Option<MovementDirection> = None;
+
         if keys.just_pressed(KeyCode::KeyA) {
-            player.1.movement_direction =
-                Some(MovementDirection::West.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::West);
         }
         if keys.just_pressed(KeyCode::KeyD) {
-            player.1.movement_direction =
-                Some(MovementDirection::East.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::East);
         }
         if keys.just_pressed(KeyCode::KeyW) {
-            player.1.movement_direction =
-                Some(MovementDirection::NorthWest.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::NorthWest);
         }
         if keys.just_pressed(KeyCode::KeyE) {
-            player.1.movement_direction =
-                Some(MovementDirection::NorthEast.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::NorthEast);
         }
         if keys.just_pressed(KeyCode::KeyZ) {
-            player.1.movement_direction =
-                Some(MovementDirection::SouthWest.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::SouthWest);
         }
         if keys.just_pressed(KeyCode::KeyX) {
-            player.1.movement_direction =
-                Some(MovementDirection::SouthEast.rotate_y(camera.total_6th_rotations));
-            player.1.movement_animation_percentage = Some(0.0);
+            movement_direction = Some(MovementDirection::SouthEast);
         }
 
-        // Abort moving if there is no tile to move to.
-        // TODO: Improve this collision detection (walls, other stuff in the future).
-        // Movement is currently allowed if there is a tile-top at the destination or below it.
-        if let Some(direction) = player.1.movement_direction.clone() {
-            let direction_offset = direction.get_tile_coordinate_offset();
-            let target_coordinate = (
-                player.1.x + direction_offset.0,
-                player.1.y + direction_offset.1,
-                player.1.z + direction_offset.2,
-            );
+        match movement_direction {
+            Some(direction) => {
+                let offset = direction
+                    .rotate_y(camera.total_6th_rotations)
+                    .get_tile_coordinate_offset();
 
-            if !tiles.iter().any(|tile| {
-                tile.1.is_on_top
-                    && tile.1.x == target_coordinate.0
-                    && tile.1.y <= target_coordinate.1
-                    && tile.1.z == target_coordinate.2
-            }) {
-                // Character can't go here; a tile top must be here or below it.
-                player.1.movement_direction = None;
-                player.1.movement_animation_percentage = None;
+                let destination_tile = (
+                    player.1.x + offset.x as isize,
+                    player.1.y + offset.y as isize,
+                    player.1.z + offset.z as isize,
+                );
+
+                // Only move the player if there is a destination tile
+                // at the destination (or below it). Otherwise the player
+                // could fall off the island.
+                if tiles.iter().any(|tile| {
+                    tile.1.is_on_top
+                        && tile.1.x == destination_tile.0
+                        && tile.1.y <= destination_tile.1
+                        && tile.1.z == destination_tile.2
+                }) {
+                    commands.entity(player.3).insert(Movement {
+                        animation_percentage: 0.0,
+                        movement_speed: player.1.movement_speed,
+                        offset: offset,
+                    });
+                }
             }
-        }
+            None => {}
+        };
     }
 }
