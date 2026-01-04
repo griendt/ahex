@@ -11,7 +11,7 @@ use crate::{
         lighting::{create_the_sun, update_the_sun},
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{setup, setup_effects},
-        tiles::{colorize_tiles, set_tile_transform},
+        tiles::{apply_movement_map, apply_player_movement, colorize_tiles},
     },
 };
 
@@ -67,12 +67,13 @@ fn main() {
                 rotate_goal,
                 colorize_tiles,
                 collect_goals,
-                set_tile_transform,
+                apply_player_movement,
                 restart_level,
                 go_to_next_level,
                 show_level_complete,
                 update_the_sun,
-                player_controls.after(set_tile_transform),
+                player_controls.after(apply_player_movement),
+                apply_movement_map,
             ),
         )
         .run();

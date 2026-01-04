@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
 
-use crate::components::{tile::Tile, tile_coordinates::TileCoordinates};
+use crate::components::{
+    player::Player,
+    tile::{MovementMap, Tile},
+    tile_coordinates::TileCoordinates,
+};
 
 pub fn colorize_tiles(
     mut commands: Commands,
@@ -36,7 +40,60 @@ pub fn colorize_tiles(
     }
 }
 
-pub fn set_tile_transform(query: Query<(&mut Transform, &mut TileCoordinates)>) {
+pub fn apply_movement_map(
+    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap)>,
+    timer: Res<Time>,
+) {
+    let sqrt3 = 3f32.sqrt();
+
+    for (mut transform, mut tile, mut movement_map) in query {
+        let offset = match movement_map.map.is_empty() {
+            false => movement_map.map[movement_map.index % movement_map.map.len()],
+            true => (0, 0, 0),
+        };
+
+        let animation_percentage = tile.movement_animation_percentage.unwrap_or_default();
+
+        // If animation is finished, set the actual coordinates and stop animating.
+        if animation_percentage >= 1.0 {
+            tile.x += offset.0;
+            tile.y += offset.1;
+            tile.z += offset.2;
+            movement_map.index += 1;
+            tile.movement_animation_percentage = None;
+            info!("Finished a moveent map step");
+        }
+
+        // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
+        transform.translation.x = ((tile.x as f32) + (tile.z as f32) / 2f32) * sqrt3;
+        transform.translation.z = (tile.z as f32) * -1.5;
+
+        // A tile's width is 0.6 so if an object is supposed to be on top of the tile, grant it +0.2 on the z-axis.
+        transform.translation.y = 0.8 * tile.y as f32 + if tile.is_on_top { 0.6 } else { 0.0 };
+
+        // Display the entity percentually towards the destination coordinates, if animating.
+        if animation_percentage < 1.0 {
+            transform.translation.x +=
+                animation_percentage * (sqrt3 * (offset.0 as f32 + offset.2 as f32 / 2f32) as f32);
+            transform.translation.y += animation_percentage * (0.8 * offset.1 as f32);
+            transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
+        }
+
+        // Apply any further visual offset
+        transform.translation += tile.visual_offset;
+
+        tile.movement_animation_percentage = Some(
+            (tile.movement_animation_percentage.unwrap_or_default()
+                + tile.movement_speed * timer.delta_secs())
+            .clamp(0.0, 1.0),
+        );
+    }
+}
+
+// TODO: This resets immovable tiles' coordinates on every frame, this is not necessary
+pub fn apply_player_movement(
+    query: Query<(&mut Transform, &mut TileCoordinates), Without<MovementMap>>,
+) {
     let sqrt3 = 3f32.sqrt();
 
     for (mut transform, mut tile) in query {

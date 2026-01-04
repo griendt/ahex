@@ -21,7 +21,10 @@ use bevy_gltf::GltfAssetLabel;
 use serde::Deserialize;
 
 use crate::components::{
-    goal::Goal, player::Player, tile::Tile, tile_coordinates::TileCoordinates,
+    goal::Goal,
+    player::Player,
+    tile::{MovementMap, Tile},
+    tile_coordinates::TileCoordinates,
 };
 
 #[derive(Component)]
@@ -294,7 +297,7 @@ impl LevelParser {
                 y: y,
                 z: z,
                 is_on_top: is_on_top,
-                movement_map: movement_map.clone(),
+                movement_speed: 1.0,
                 ..default()
             },
             SceneRoot(if is_on_top {
@@ -303,6 +306,10 @@ impl LevelParser {
                 tile_below_asset.clone()
             }),
             Transform::default(),
+            MovementMap {
+                map: movement_map.clone(),
+                index: 0,
+            },
         );
 
         commands.spawn(bundle);
