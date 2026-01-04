@@ -1,19 +1,19 @@
 [metadata]
-name = "Level 2"
+name = "Level 3"
 biome = "DAYLIGHT"
-help_text = "W/E/Z/X: Move"
+help_text = "←/→: Move Camera"
 
 [[layers]]
 pillars = true
 height_map = """
 11111111
-.1.2.214
-..1.1111
-..121..3
+..444144
+..444414
+...00004
 """
 modifiers = ["""
+P.......
 ........
 ........
-........
-..G.P...
+...G....
 """]

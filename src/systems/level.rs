@@ -105,4 +105,32 @@ pub fn show_level_complete(
                 LevelEntityMarker,
             ));
         });
+
+    commands
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                justify_content: JustifyContent::Center,
+                overflow: Overflow::visible(),
+                max_width: Val::Px(0.0),
+                left: Val::Percent(50.0),
+                top: Val::Percent(90.0),
+                ..default()
+            },
+            LevelEntityMarker,
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                Text::new("<Enter> to continue"),
+                TextFont {
+                    font: asset_server.load("fonts/main.ttf"),
+                    font_size: 28.0,
+                    ..default()
+                },
+                TextShadow::default(),
+                TextLayout::new_with_justify(Justify::Center).with_no_wrap(),
+                TextColor::from(LinearRgba::rgb(1.0, 1.0, 0.0)),
+                LevelEntityMarker,
+            ));
+        });
 }

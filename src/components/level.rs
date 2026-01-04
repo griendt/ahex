@@ -9,7 +9,12 @@ use bevy::{
     log::info,
     math::Vec3,
     scene::SceneRoot,
+    text::TextFont,
     transform::components::Transform,
+    ui::{
+        Node, PositionType, px,
+        widget::{Text, TextShadow},
+    },
     utils::default,
 };
 use bevy_gltf::GltfAssetLabel;
@@ -38,6 +43,7 @@ pub struct LevelParser {
 pub struct LevelMetadata {
     pub name: String,
     pub biome: LevelMetadataBiome,
+    pub help_text: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -56,6 +62,26 @@ pub struct LevelLayer {
 
 impl LevelParser {
     pub fn render_level(&self, commands: &mut Commands, asset_server: &Res<AssetServer>) {
+        if !self.metadata.help_text.is_empty() {
+            commands.spawn((
+                HelpTextMarker,
+                LevelEntityMarker,
+                Text::new(self.metadata.help_text.as_str()),
+                TextFont {
+                    font: asset_server.load("fonts/main.ttf"),
+                    font_size: 48.0,
+                    ..default()
+                },
+                TextShadow::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(20),
+                    left: px(20),
+                    ..default()
+                },
+            ));
+        }
+
         let (x_offset, z_offset) = self.get_level_xz_offsets();
 
         for layer in &self.layers {

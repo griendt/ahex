@@ -3,7 +3,6 @@ use bevy::{
     camera::Camera3d,
     core_pipeline::tonemapping::Tonemapping,
     ecs::system::{Commands, Res, ResMut},
-    light::DirectionalLight,
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
@@ -26,23 +25,7 @@ use crate::{
     resources::effects::GlobalEffects,
 };
 
-pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        HelpTextMarker,
-        Text::new("- W/E/A/D/Z/X\n- Backspace\n- ←/→"),
-        TextFont {
-            font: asset_server.load("fonts/main.ttf"),
-            font_size: 48.0,
-            ..default()
-        },
-        TextShadow::default(),
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(20),
-            left: px(20),
-            ..default()
-        },
-    ));
+pub fn setup(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         CameraAngle {
@@ -64,17 +47,6 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             max_mip_dimension: 512,
             scale: Vec2::ONE,
         },
-    ));
-
-    commands.spawn((
-        DirectionalLight {
-            shadows_enabled: true,
-            soft_shadow_size: None,
-            affects_lightmapped_mesh_diffuse: false,
-            illuminance: 2000.0,
-            ..default()
-        },
-        Transform::from_xyz(-60.0, 100.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 

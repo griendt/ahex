@@ -1,0 +1,17 @@
+[metadata]
+name = "Level 4"
+biome = "DAYLIGHT"
+help_text = "<Backspace>: Restart Level"
+
+[[layers]]
+pillars = true
+height_map = """
+..1334
+.00112
+001222
+"""
+modifiers = ["""d
+...P..
+......
+..G...
+""""]

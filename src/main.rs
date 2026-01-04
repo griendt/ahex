@@ -8,6 +8,7 @@ use crate::{
         camera::move_camera,
         goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
         level::{build_level, go_to_next_level, restart_level, show_level_complete},
+        lighting::{create_the_sun, update_the_sun},
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{setup, setup_effects},
         tiles::{colorize_tiles, set_tile_transform},
@@ -48,7 +49,14 @@ fn main() {
         }))
         .add_plugins(WaterPlugin)
         .add_plugins(HanabiPlugin)
-        .add_systems(Startup, (setup, setup_effects, build_level.after(setup)))
+        .add_systems(
+            Startup,
+            (
+                setup,
+                setup_effects,
+                (build_level, create_the_sun).after(setup),
+            ),
+        )
         .add_systems(
             Update,
             (
@@ -63,6 +71,7 @@ fn main() {
                 restart_level,
                 go_to_next_level,
                 show_level_complete,
+                update_the_sun,
                 player_controls.after(set_tile_transform),
             ),
         )

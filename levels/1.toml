@@ -1,18 +1,13 @@
 [metadata]
 name = "Level 1"
 biome = "DAYLIGHT"
+help_text = "A/D: Move"
 
 [[layers]]
 pillars = true
 height_map = """
-11111111
-.1.2.014
-..1.1111
-..121..0
+33333
 """
 modifiers = ["""
-........
-........
-........
-..G.P...
+P...G
 """]
