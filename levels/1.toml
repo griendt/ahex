@@ -1,37 +1,13 @@
 [metadata]
-name = "Level 5"
+name = "Level 1"
 biome = "DAYLIGHT"
-help_text = ""
+help_text = "A/D: Move"
 
 [[layers]]
 pillars = true
 height_map = """
-...3.
-....3
-333.3
-.3...
+33333
 """
 modifiers = ["""
-.....
-.....
 P...G
-.....
-""""]
-
-[[layers]]
-pillars = false
-height_map = """
-.....
-.....
-...3.
-.....
-"""
-modifiers = ["""
-.....
-.....
-...M.
-.....
-""""]
-movement_maps = [
-    [[-1, 0, 2], [1, 0, -2]]
-]
+"""]

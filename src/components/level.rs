@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::components::{
     goal::Goal,
     player::Player,
-    tile::{MovementMap, Tile},
+    tile::{Carriable, MovementMap, Tile},
     tile_coordinates::TileCoordinates,
 };
 
@@ -181,11 +181,6 @@ impl Level {
                 }
             }
         }
-
-        // Fire this event so that stuff that normally occurs after each step,
-        // also occurs before the first step. This puts tiles into place, starts
-        // the first movements and so on.
-        // commands.trigger(PlayerFinishedMoving {});
     }
 
     fn get_level_xz_offsets(&self) -> (isize, isize) {
@@ -233,6 +228,7 @@ impl Level {
     ) {
         commands.spawn((
             Player {},
+            Carriable {},
             LevelEntityMarker,
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
             TileCoordinates {

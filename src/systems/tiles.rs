@@ -5,7 +5,7 @@ use crate::{
     components::{
         movement::Movement,
         player::{Player, PlayerFinishedMoving, PlayerStartedMoving},
-        tile::{MovementMap, Tile},
+        tile::{Carriable, MovementMap, Tile},
         tile_coordinates::TileCoordinates,
     },
     resources::levels::LevelState,
@@ -58,8 +58,8 @@ pub fn on_player_started_moving(_event: On<PlayerStartedMoving>, mut level: ResM
 }
 
 pub fn apply_movement_map(
-    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap), Without<Player>>,
-    carriables: Query<(&TileCoordinates, &Player, Entity), Without<Movement>>,
+    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap), Without<Carriable>>,
+    carriables: Query<(&TileCoordinates, &Carriable, Entity), Without<Movement>>,
     timer: Res<Time>,
     mut commands: Commands,
     mut level: ResMut<LevelResource>,
@@ -82,14 +82,14 @@ pub fn apply_movement_map(
             .unwrap_or_default()
             .clamp(0.0, 1.0);
 
-        for (player_coordinates, _player, player_entity) in carriables {
-            if player_coordinates.x == tile.x
-                && player_coordinates.y == tile.y
-                && player_coordinates.z == tile.z
+        for (carriable_coordinates, _carriable, carriable_entity) in carriables {
+            if carriable_coordinates.x == tile.x
+                && carriable_coordinates.y == tile.y
+                && carriable_coordinates.z == tile.z
             {
                 // NOTE: The player starts moving here but we do NOT fire the `PlayerStartedMoving` event.
                 // This is because we want to trigger this event only if caused by the player pressing a movement key.
-                commands.entity(player_entity).insert(Movement {
+                commands.entity(carriable_entity).insert(Movement {
                     offset: Vec3::new(offset.0 as f32, offset.1 as f32, offset.2 as f32),
                     movement_speed: tile.movement_speed,
                     animation_percentage: animation_percentage,
@@ -141,37 +141,58 @@ pub fn apply_movement_map(
 
 pub fn apply_player_movement(
     mut commands: Commands,
-    query: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
+    players: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
+    tiles: Query<(&Tile, &TileCoordinates), Without<Player>>,
     level: Res<LevelResource>,
     timer: Res<Time>,
 ) {
-    for (mut tile, movement, entity) in query {
+    let mut all_moving_players_finished_moving = true;
+
+    for (mut player_tile, movement, entity) in players {
         match movement {
             Some(mut movement) => {
                 let animation_percentage = movement.animation_percentage;
-                movement.animation_percentage += movement.movement_speed * timer.delta_secs();
+                movement.animation_percentage = (movement.animation_percentage
+                    + movement.movement_speed * timer.delta_secs())
+                .clamp(0., 1.);
 
                 // If animation is finished, set the actual coordinates and stop animating.
                 if animation_percentage >= 1.0 {
-                    tile.x += movement.offset.x as isize;
-                    tile.y += movement.offset.y as isize;
-                    tile.z += movement.offset.z as isize;
+                    player_tile.x += movement.offset.x as isize;
+                    player_tile.y += movement.offset.y as isize;
+                    player_tile.z += movement.offset.z as isize;
 
                     movement.animation_percentage = 0.0;
                     commands.entity(entity).remove::<Movement>();
 
-                    // Only trigger this event if it was not falling
-                    if movement.offset.y == 0.0
-                        && movement.offset != Vec3::ZERO
-                        && matches!(level.level_state, LevelState::ProcessingPlayerInput)
-                    {
-                        info!("Triggering player finished event {movement:#?}");
-                        commands.trigger(PlayerFinishedMoving {});
+                    // If there is no tile at the destination tile, the player is going to fall.
+                    // This also means we should not yet trigger a `PlayerFinishedMoving` event.
+                    if !tiles.iter().any(|tile| {
+                        tile.1.is_on_top
+                            && tile.1.x == player_tile.x
+                            && tile.1.y == player_tile.y
+                            && tile.1.z == player_tile.z
+                    }) {
+                        commands.entity(entity).insert(Movement {
+                            offset: Vec3::new(0., -1., 0.),
+                            movement_speed: player_tile.falling_speed,
+                            animation_percentage: 0.0,
+                        });
+
+                        all_moving_players_finished_moving = false;
                     }
+                } else {
+                    all_moving_players_finished_moving = false;
                 }
             }
             None => {}
         }
+    }
+
+    if all_moving_players_finished_moving
+        && matches!(level.level_state, LevelState::ProcessingPlayerInput)
+    {
+        commands.trigger(PlayerFinishedMoving {});
     }
 }
 
