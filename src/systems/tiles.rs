@@ -4,7 +4,7 @@ use bevy_gltf::GltfMaterialName;
 use crate::{
     components::{
         movement::Movement,
-        player::{Player, PlayerFinishedMoving},
+        player::{Player, PlayerFinishedMoving, PlayerStartedMoving},
         tile::{MovementMap, Tile},
         tile_coordinates::TileCoordinates,
     },
@@ -46,16 +46,22 @@ pub fn colorize_tiles(
     }
 }
 
-pub fn set_level_state_to_processing_level_effects(
+pub fn on_player_finished_moving(
     _event: On<PlayerFinishedMoving>,
     mut level: ResMut<LevelResource>,
 ) {
     level.level_state = LevelState::ProcessingLevelEffects;
 }
 
+pub fn on_player_started_moving(_event: On<PlayerStartedMoving>, mut level: ResMut<LevelResource>) {
+    level.level_state = LevelState::ProcessingPlayerInput;
+}
+
 pub fn apply_movement_map(
-    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap)>,
+    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap), Without<Player>>,
+    carriables: Query<(&TileCoordinates, &Player, Entity), Without<Movement>>,
     timer: Res<Time>,
+    mut commands: Commands,
     mut level: ResMut<LevelResource>,
 ) {
     if !matches!(level.level_state, LevelState::ProcessingLevelEffects) {
@@ -72,6 +78,21 @@ pub fn apply_movement_map(
 
         let animation_percentage = tile.movement_animation_percentage.unwrap_or_default();
 
+        for (player_coordinates, _player, player_entity) in carriables {
+            if player_coordinates.x == tile.x
+                && player_coordinates.y == tile.y
+                && player_coordinates.z == tile.z
+            {
+                // NOTE: The player starts moving here but we do NOT fire the `PlayerStartedMoving` event.
+                // This is because we want to trigger this event only if caused by the player pressing a movement key.
+                commands.entity(player_entity).insert(Movement {
+                    offset: Vec3::new(offset.0 as f32, offset.1 as f32, offset.2 as f32),
+                    movement_speed: tile.movement_speed,
+                    animation_percentage: animation_percentage,
+                });
+            }
+        }
+
         // If animation is finished, set the actual coordinates and stop animating.
         if animation_percentage >= 1.0 {
             tile.x += offset.0;
@@ -79,7 +100,6 @@ pub fn apply_movement_map(
             tile.z += offset.2;
             movement_map.index += 1;
             tile.movement_animation_percentage = None;
-            info!("Finished a moveent map step");
 
             // TODO: what if different entities finish at a different time?
             level.level_state = LevelState::WaitingForPlayerInput;
@@ -114,6 +134,7 @@ pub fn apply_movement_map(
 pub fn apply_player_movement(
     mut commands: Commands,
     query: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
+    level: Res<LevelResource>,
     timer: Res<Time>,
 ) {
     for (mut tile, movement, entity) in query {
@@ -132,7 +153,11 @@ pub fn apply_player_movement(
                     commands.entity(entity).remove::<Movement>();
 
                     // Only trigger this event if it was not falling
-                    if movement.offset.y == 0.0 {
+                    if movement.offset.y == 0.0
+                        && movement.offset != Vec3::ZERO
+                        && matches!(level.level_state, LevelState::ProcessingPlayerInput)
+                    {
+                        info!("Triggering player finished event {movement:#?}");
                         commands.trigger(PlayerFinishedMoving {});
                     }
                 }

@@ -1,7 +1,4 @@
-use bevy::{
-    ecs::{component::Component, event::Event},
-    math::Vec3,
-};
+use bevy::{ecs::component::Component, math::Vec3};
 
 /// Marking a TileCoordinates component with Movement
 /// will cause it to move to tile coordinates offset

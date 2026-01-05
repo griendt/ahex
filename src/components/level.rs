@@ -44,7 +44,9 @@ pub struct Level {
 
 #[derive(Deserialize, Debug)]
 pub struct LevelMetadata {
+    #[allow(unused)]
     pub name: String,
+    #[allow(unused)]
     pub biome: LevelMetadataBiome,
     pub help_text: String,
 }
@@ -157,6 +159,8 @@ impl Level {
                                         .nth(num_movement_maps_applied)
                                         .expect("Too few movement maps specified")
                                         .clone();
+
+                                num_movement_maps_applied += 1;
                             }
                             _ => continue,
                         };

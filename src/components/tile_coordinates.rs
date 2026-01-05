@@ -7,7 +7,6 @@ pub struct TileCoordinates {
     pub z: isize,
     pub visual_offset: Vec3,
     pub is_on_top: bool,
-    pub movement_direction: Option<MovementDirection>,
     pub movement_animation_percentage: Option<f32>,
     pub movement_speed: f32,
     pub falling_speed: f32,
@@ -21,9 +20,8 @@ impl Default for TileCoordinates {
             z: 0,
             visual_offset: Vec3::ZERO,
             is_on_top: true,
-            movement_direction: None,
             movement_animation_percentage: None,
-            movement_speed: 1.0,
+            movement_speed: 3.0,
             falling_speed: 20.0,
         }
     }
@@ -37,9 +35,6 @@ pub enum MovementDirection {
     SouthEast,
     SouthWest,
     West,
-    #[allow(unused)]
-    Up,
-    Down,
 }
 
 impl MovementDirection {
@@ -51,8 +46,6 @@ impl MovementDirection {
             MovementDirection::NorthWest => Vec3::new(-1., 0., 1.),
             MovementDirection::SouthEast => Vec3::new(1., 0., -1.),
             MovementDirection::SouthWest => Vec3::new(0., 0., -1.),
-            MovementDirection::Up => Vec3::new(0., 1., 0.),
-            MovementDirection::Down => Vec3::new(0., -1., 0.),
         }
     }
 

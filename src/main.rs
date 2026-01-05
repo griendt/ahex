@@ -12,8 +12,8 @@ use crate::{
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{setup, setup_effects},
         tiles::{
-            apply_movement_map, apply_player_movement, colorize_tiles,
-            set_level_state_to_processing_level_effects, set_transform_based_on_tile_coordinates,
+            apply_movement_map, apply_player_movement, colorize_tiles, on_player_finished_moving,
+            on_player_started_moving, set_transform_based_on_tile_coordinates,
         },
     },
 };
@@ -81,6 +81,7 @@ fn main() {
                 apply_movement_map,
             ),
         )
-        .add_observer(set_level_state_to_processing_level_effects)
+        .add_observer(on_player_finished_moving)
+        .add_observer(on_player_started_moving)
         .run();
 }

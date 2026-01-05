@@ -7,7 +7,7 @@ use crate::{
         camera::CameraAngle,
         goal::Goal,
         movement::Movement,
-        player::Player,
+        player::{Player, PlayerStartedMoving},
         tile::Tile,
         tile_coordinates::{MovementDirection, TileCoordinates},
     },
@@ -153,6 +153,8 @@ pub fn player_controls(
                         movement_speed: player.1.movement_speed,
                         offset: offset,
                     });
+
+                    commands.trigger(PlayerStartedMoving {});
                 }
             }
             None => {}
