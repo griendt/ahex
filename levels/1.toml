@@ -6,8 +6,10 @@ help_text = "A/D: Move"
 [[layers]]
 pillars = true
 height_map = """
+...0.
 33333
 """
 modifiers = ["""
+.....
 P...G
 """]
