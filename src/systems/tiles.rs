@@ -69,14 +69,18 @@ pub fn apply_movement_map(
     }
 
     let sqrt3 = 3f32.sqrt();
+    let mut exists_unfinished_movement_map = false;
 
     for (mut transform, mut tile, mut movement_map) in query {
-        let offset = match movement_map.map.is_empty() {
-            false => movement_map.map[movement_map.index % movement_map.map.len()],
-            true => (0, 0, 0),
-        };
+        if movement_map.map.is_empty() {
+            continue;
+        }
 
-        let animation_percentage = tile.movement_animation_percentage.unwrap_or_default();
+        let offset = movement_map.map[movement_map.index % movement_map.map.len()];
+        let animation_percentage = tile
+            .movement_animation_percentage
+            .unwrap_or_default()
+            .clamp(0.0, 1.0);
 
         for (player_coordinates, _player, player_entity) in carriables {
             if player_coordinates.x == tile.x
@@ -100,9 +104,8 @@ pub fn apply_movement_map(
             tile.z += offset.2;
             movement_map.index += 1;
             tile.movement_animation_percentage = None;
-
-            // TODO: what if different entities finish at a different time?
-            level.level_state = LevelState::WaitingForPlayerInput;
+        } else {
+            exists_unfinished_movement_map = true;
         }
 
         // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
@@ -128,6 +131,11 @@ pub fn apply_movement_map(
                 + tile.movement_speed * timer.delta_secs())
             .clamp(0.0, 1.0),
         );
+    }
+
+    // If all movement maps have finished, we can process the new player input.
+    if !exists_unfinished_movement_map {
+        level.level_state = LevelState::WaitingForPlayerInput;
     }
 }
 

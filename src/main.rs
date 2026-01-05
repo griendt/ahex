@@ -10,7 +10,7 @@ use crate::{
         level::{build_level, go_to_next_level, restart_level, show_level_complete},
         lighting::{create_the_sun, update_the_sun},
         player::{add_player_bloom, collect_goals, player_controls},
-        setup::{setup, setup_effects},
+        setup::{enable_water_shadows, setup, setup_effects},
         tiles::{
             apply_movement_map, apply_player_movement, colorize_tiles, on_player_finished_moving,
             on_player_started_moving, set_transform_based_on_tile_coordinates,
@@ -36,7 +36,7 @@ fn main() {
             height: 0.3,
             amplitude: 1.5,
             alpha_mode: AlphaMode::Add,
-            water_quality: bevy_water::WaterQuality::High, // High or better for shadows
+            water_quality: bevy_water::WaterQuality::Basic, // High or better for shadows
             deep_color: Color::hsla(180.0, 1.0, 0.6, 1.0),
             ..default()
         })
@@ -61,6 +61,7 @@ fn main() {
                 (build_level, create_the_sun).after(setup),
             ),
         )
+        .add_systems(PostStartup, enable_water_shadows)
         .add_systems(
             Update,
             (

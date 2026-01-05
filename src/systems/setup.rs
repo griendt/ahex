@@ -2,7 +2,12 @@ use bevy::{
     asset::{AssetServer, Assets},
     camera::Camera3d,
     core_pipeline::tonemapping::Tonemapping,
-    ecs::system::{Commands, ResMut},
+    ecs::{
+        entity::Entity,
+        query::With,
+        system::{Commands, Query, ResMut},
+    },
+    light::NotShadowReceiver,
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
     post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
@@ -14,6 +19,7 @@ use bevy_hanabi::{
     SetAttributeModifier, SetPositionSphereModifier, SetVelocitySphereModifier, ShapeDimension,
     SpawnerSettings,
 };
+use bevy_water::WaterTile;
 
 use crate::{components::camera::CameraAngle, resources::effects::GlobalEffects};
 
@@ -113,4 +119,13 @@ pub fn setup_effects(
 
     // Insert into the asset system and save a handle for later use
     effects.goal_explosion_effect = Some(assets.add(effect));
+}
+
+pub fn enable_water_shadows(
+    mut commands: Commands,
+    query: Query<(&WaterTile, Entity), With<NotShadowReceiver>>,
+) {
+    for water_tile in query {
+        commands.entity(water_tile.1).remove::<NotShadowReceiver>();
+    }
 }
