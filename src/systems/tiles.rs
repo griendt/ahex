@@ -167,12 +167,16 @@ pub fn apply_player_movement(
 
                     // If there is no tile at the destination tile, the player is going to fall.
                     // This also means we should not yet trigger a `PlayerFinishedMoving` event.
+                    // NOTE: We only do this in the `ProcessingPlayerInput` phase right now, because
+                    // otherwise there is a race condition with moving tiles that finish moving and have their coordinates updated.
+                    // This check should technically come _after_ those tiles are done moving.
                     if !tiles.iter().any(|tile| {
                         tile.1.is_on_top
                             && tile.1.x == player_tile.x
                             && tile.1.y == player_tile.y
                             && tile.1.z == player_tile.z
-                    }) {
+                    }) && matches!(level.level_state, LevelState::ProcessingPlayerInput)
+                    {
                         commands.entity(entity).insert(Movement {
                             offset: Vec3::new(0., -1., 0.),
                             movement_speed: player_tile.falling_speed,
