@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::components::{
     goal::Goal,
     player::Player,
-    tile::{Carriable, MovementMap, Tile},
+    tile::{Carriable, MovementMap, ShouldRenderMovementMapPolylines, Tile},
     tile_coordinates::TileCoordinates,
 };
 
@@ -256,22 +256,22 @@ impl Level {
         commands.spawn((
             Goal {},
             LevelEntityMarker,
-            SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("goal.glb"))),
+            SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("banana.glb"))),
             TileCoordinates {
                 x: x,
                 y: y,
                 z: z,
-                visual_offset: Vec3::new(0.0, 0.5, 0.0),
+                visual_offset: Vec3::new(-0.05, 0.4, 0.05),
                 ..default()
             },
             Transform {
-                scale: Vec3::new(0.5, 0.5, 0.5),
+                scale: Vec3::new(0.15, 0.15, 0.2),
                 ..default()
             },
             PointLight {
-                intensity: 500_000.0,
+                intensity: 200_000.0,
                 color: YELLOW.into(),
-                shadows_enabled: true,
+                shadows_enabled: false,
                 ..default()
             },
         ));
@@ -296,6 +296,7 @@ impl Level {
             Tile {
                 color: Color::hsla(90.0, 0.8, (0.4 + 0.1 * y as f32).clamp(0.05, 1.0), 1.0),
             },
+            ShouldRenderMovementMapPolylines,
             LevelEntityMarker,
             TileCoordinates {
                 x: x,

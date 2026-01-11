@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_hanabi::HanabiPlugin;
+use bevy_polyline::PolylinePlugin;
 use bevy_water::{WaterPlugin, WaterSettings};
 
 use crate::{
@@ -12,8 +13,9 @@ use crate::{
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{enable_water_shadows, setup, setup_effects},
         tiles::{
-            apply_movement_map, apply_player_movement, colorize_tiles, on_player_finished_moving,
-            on_player_started_moving, set_transform_based_on_tile_coordinates,
+            apply_movement_map, apply_player_movement, colorize_tiles, draw_moving_tiles_polylines,
+            on_player_finished_moving, on_player_started_moving,
+            set_transform_based_on_tile_coordinates,
         },
     },
 };
@@ -53,6 +55,7 @@ fn main() {
         }))
         .add_plugins(WaterPlugin)
         .add_plugins(HanabiPlugin)
+        .add_plugins(PolylinePlugin)
         .add_systems(
             Startup,
             (
@@ -71,6 +74,7 @@ fn main() {
                 move_camera,
                 rotate_goal,
                 colorize_tiles,
+                draw_moving_tiles_polylines.run_if(|| false),
                 collect_goals,
                 apply_player_movement,
                 restart_level,

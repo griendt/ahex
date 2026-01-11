@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 use bevy_gltf::GltfMaterialName;
+use bevy_polyline::prelude::{
+    Polyline, PolylineBundle, PolylineHandle, PolylineMaterial, PolylineMaterialHandle,
+};
 
 use crate::{
     components::{
         movement::Movement,
         player::{Player, PlayerFinishedMoving, PlayerStartedMoving},
-        tile::{Carriable, MovementMap, Tile},
-        tile_coordinates::TileCoordinates,
+        tile::{Carriable, MovementMap, ShouldRenderMovementMapPolylines, Tile},
+        tile_coordinates::{TileCoordinates, tile_coordinates_to_transform_coordinates},
     },
     resources::levels::LevelState,
 };
@@ -43,6 +46,53 @@ pub fn colorize_tiles(
                 }
             }
         }
+    }
+}
+
+pub fn draw_moving_tiles_polylines(
+    mut commands: Commands,
+    mut polyline_materials: ResMut<Assets<PolylineMaterial>>,
+    mut polylines: ResMut<Assets<Polyline>>,
+    tiles: Query<(Entity, &TileCoordinates, &MovementMap), With<ShouldRenderMovementMapPolylines>>,
+) {
+    let polyline_material_handle = PolylineMaterialHandle(
+        polyline_materials.add(PolylineMaterial {
+            width: 300.0,
+            color: Hsla {
+                hue: 0.0,
+                saturation: 1.0,
+                lightness: 1.0,
+                alpha: 0.1,
+            }
+            .into(),
+            perspective: true,
+            ..default()
+        }),
+    );
+
+    for (entity, tile_coordinates, movement_map) in tiles {
+        let mut vertex = Vec3::new(
+            tile_coordinates.x as f32,
+            tile_coordinates.y as f32,
+            tile_coordinates.z as f32,
+        );
+
+        let mut vertices = vec![tile_coordinates_to_transform_coordinates(&vertex)];
+
+        for offset in &movement_map.map {
+            vertex += Vec3::new(offset.0 as f32, offset.1 as f32, offset.2 as f32);
+            vertices.push(tile_coordinates_to_transform_coordinates(&vertex));
+        }
+
+        commands.spawn(PolylineBundle {
+            polyline: PolylineHandle(polylines.add(Polyline { vertices: vertices })),
+            material: polyline_material_handle.clone(),
+            ..default()
+        });
+
+        commands
+            .entity(entity)
+            .remove::<ShouldRenderMovementMapPolylines>();
     }
 }
 
@@ -108,12 +158,16 @@ pub fn apply_movement_map(
             exists_unfinished_movement_map = true;
         }
 
-        // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
-        transform.translation.x = ((tile.x as f32) + (tile.z as f32) / 2f32) * sqrt3;
-        transform.translation.z = (tile.z as f32) * -1.5;
+        transform.translation = tile_coordinates_to_transform_coordinates(&Vec3::new(
+            tile.x as f32,
+            tile.y as f32,
+            tile.z as f32,
+        ));
 
         // A tile's width is 0.6 so if an object is supposed to be on top of the tile, grant it +0.2 on the z-axis.
-        transform.translation.y = 0.8 * tile.y as f32 + if tile.is_on_top { 0.6 } else { 0.0 };
+        if tile.is_on_top {
+            transform.translation.y += 0.6;
+        }
 
         // Display the entity percentually towards the destination coordinates, if animating.
         if animation_percentage < 1.0 {
@@ -206,12 +260,15 @@ pub fn set_transform_based_on_tile_coordinates(
     let sqrt3 = 3f32.sqrt();
 
     for (mut transform, tile, movement) in query {
-        // An offset in the z-coordinate will move it to the right and up (visually); we use hexagonal geometry with pointy tops.
-        transform.translation.x = ((tile.x as f32) + (tile.z as f32) / 2f32) * sqrt3;
-        transform.translation.z = (tile.z as f32) * -1.5;
+        transform.translation = tile_coordinates_to_transform_coordinates(&Vec3::new(
+            tile.x as f32,
+            tile.y as f32,
+            tile.z as f32,
+        ));
 
-        // A tile's width is 0.6 so if an object is supposed to be on top of the tile, grant it +0.2 on the z-axis.
-        transform.translation.y = 0.8 * tile.y as f32 + if tile.is_on_top { 0.6 } else { 0.0 };
+        if tile.is_on_top {
+            transform.translation.y += 0.6;
+        }
 
         // Display the entity percentually towards the destination coordinates, if animating.
         match movement {

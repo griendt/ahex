@@ -3,13 +3,11 @@ use bevy_gltf::GltfMaterialName;
 
 use crate::components::goal::Goal;
 
-const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(1.0, 1.0, 0.0);
+const BLOOM_COLOR: LinearRgba = LinearRgba::rgb(0.2, 0.2, 0.0);
 
 pub fn rotate_goal(query: Query<&mut Transform, With<Goal>>, timer: Res<Time>) {
     for mut goal in query {
-        goal.rotate_local_x(timer.delta_secs());
-        goal.rotate_local_y(timer.delta_secs() / 2.0);
-        goal.rotate_local_z(timer.delta_secs() / 4.0);
+        goal.rotate_local_y(timer.delta_secs() * 1.0);
     }
 }
 
@@ -44,6 +42,6 @@ pub fn add_goal_bloom(
 
 pub fn vary_goal_intensity(query: Query<&mut PointLight, With<Goal>>, timer: Res<Time>) {
     for mut light in query {
-        light.intensity = 300_000.0 + 200_000.0 * timer.elapsed_secs().sin();
+        light.intensity = 50_000.0 + 40_000.0 * timer.elapsed_secs().sin();
     }
 }

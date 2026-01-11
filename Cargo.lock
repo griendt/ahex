@@ -102,6 +102,7 @@ dependencies = [
  "bevy_common_assets",
  "bevy_gltf",
  "bevy_hanabi",
+ "bevy_polyline",
  "bevy_water",
  "include_dir",
  "serde",
@@ -1105,6 +1106,18 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-time",
+]
+
+[[package]]
+name = "bevy_polyline"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a820303a4d2d0c76db77f872d3345d8ae394b61c1190a7eda73b71dd24a15a2e"
+dependencies = [
+ "bevy",
+ "bevy_post_process",
+ "bitflags 2.10.0",
+ "bytemuck",
 ]
 
 [[package]]

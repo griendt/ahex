@@ -46,6 +46,8 @@ pub fn update_the_sun(
     let redness = (TAU * sun.0.time_of_day).sin();
 
     sun.1.color = Color::srgb(0.5 + redness / 2.0, 1.0 - redness, 1.0 - redness);
+    sun.1.color = Color::WHITE;
+
     sun.1.illuminance = 2000.0 - 1500.0 * (TAU * sun.0.time_of_day).cos();
     sun.2.rotate_y(-TAU * day_fraction_passed);
     sun.2.translation.y = -100.0 + 200.0 * sun.0.time_of_day;

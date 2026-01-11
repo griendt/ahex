@@ -33,7 +33,7 @@ pub fn setup(mut commands: Commands) {
         Transform::from_xyz(0.0, 16.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {
-            intensity: 0.25,
+            intensity: 0.05,
             low_frequency_boost: 0.95,
             low_frequency_boost_curvature: 0.5,
             high_pass_frequency: 0.5,

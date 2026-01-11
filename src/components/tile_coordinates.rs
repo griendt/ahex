@@ -69,3 +69,11 @@ impl MovementDirection {
         .clone()
     }
 }
+
+pub fn tile_coordinates_to_transform_coordinates(tile_coordinates: &Vec3) -> Vec3 {
+    Vec3::new(
+        3f32.sqrt() * (tile_coordinates.x + tile_coordinates.z / 2.),
+        0.8 * tile_coordinates.y,
+        -1.5 * tile_coordinates.z,
+    )
+}

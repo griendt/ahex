@@ -13,3 +13,6 @@ pub struct MovementMap {
     pub map: Vec<(isize, isize, isize)>,
     pub index: usize,
 }
+
+#[derive(Component)]
+pub struct ShouldRenderMovementMapPolylines;
