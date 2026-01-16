@@ -5,7 +5,7 @@ use crate::{
         goal::Goal,
         level::{Level, LevelCompleteTextMarker, LevelEntityMarker},
     },
-    resources::levels::LevelResource,
+    resources::levels::{LevelResource, LevelState},
 };
 
 pub fn build_level(
@@ -25,7 +25,9 @@ pub fn restart_level(
     asset_server: Res<AssetServer>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    if keys.just_pressed(KeyCode::Backspace) {
+    if keys.just_pressed(KeyCode::Backspace)
+        && matches!(levels.level_state, LevelState::WaitingForPlayerInput)
+    {
         for entity in entities {
             commands.entity(entity.1).despawn();
         }
