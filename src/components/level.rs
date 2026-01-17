@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::components::{
     goal::Goal,
     player::Player,
-    tile::{Carriable, MovementMap, ShouldRenderMovementMapPolylines, Tile},
+    tile::{Carriable, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile},
     tile_coordinates::TileCoordinates,
 };
 
@@ -121,6 +121,7 @@ impl Level {
                     );
 
                     let mut movement_map: Vec<(isize, isize, isize)> = vec![];
+                    let mut is_icy: bool = false;
 
                     for modifier_map in &modifier_maps {
                         let modifier = modifier_map
@@ -162,6 +163,9 @@ impl Level {
 
                                 num_movement_maps_applied += 1;
                             }
+                            'I' => {
+                                is_icy = true;
+                            }
                             _ => continue,
                         };
                     }
@@ -173,6 +177,7 @@ impl Level {
                             tile_xyz.2,
                             true,
                             layer.pillars.unwrap_or(false),
+                            is_icy,
                             movement_map,
                             commands,
                             asset_server,
@@ -284,6 +289,7 @@ impl Level {
         z: isize,
         is_on_top: bool,
         is_pillar: bool,
+        is_icy: bool,
         movement_map: Vec<(isize, isize, isize)>,
         commands: &mut Commands,
         asset_server: &Res<AssetServer>,
@@ -291,6 +297,7 @@ impl Level {
         let tile_asset = asset_server.load(GltfAssetLabel::Scene(0).from_asset("tile.glb"));
         let tile_below_asset =
             asset_server.load(GltfAssetLabel::Scene(0).from_asset("tile_below.glb"));
+        let icy_tile_asset = asset_server.load(GltfAssetLabel::Scene(0).from_asset("ice.glb"));
 
         let bundle = (
             Tile {
@@ -317,7 +324,11 @@ impl Level {
             },
         );
 
-        commands.spawn(bundle);
+        commands.spawn(bundle).with_children(|parent| {
+            if is_icy {
+                parent.spawn((IcyTile, SceneRoot(icy_tile_asset.clone())));
+            }
+        });
 
         if y > 0 && is_pillar {
             self.get_tile_entity(
@@ -326,6 +337,7 @@ impl Level {
                 z,
                 false,
                 is_pillar,
+                false,
                 movement_map,
                 commands,
                 asset_server,

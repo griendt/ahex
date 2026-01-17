@@ -6,6 +6,9 @@ pub struct Tile {
 }
 
 #[derive(Component)]
+pub struct IcyTile;
+
+#[derive(Component)]
 pub struct Carriable {}
 
 #[derive(Component)]
