@@ -2,6 +2,7 @@ use bevy::{prelude::*, window::WindowResolution};
 use bevy_hanabi::HanabiPlugin;
 use bevy_polyline::PolylinePlugin;
 use bevy_water::{WaterPlugin, WaterSettings};
+use serde::Deserialize;
 
 use crate::{
     resources::levels::LevelResource,
@@ -26,7 +27,29 @@ mod components;
 mod resources;
 mod systems;
 
+#[derive(Deserialize, Debug)]
+struct Settings {
+    display: DisplaySettings,
+}
+
+#[derive(Deserialize, Debug)]
+struct DisplaySettings {
+    width: u32,
+    height: u32,
+    water: WaterDisplaySettings,
+}
+
+#[derive(Deserialize, Debug)]
+struct WaterDisplaySettings {
+    shadows_enabled: bool,
+}
+
 fn main() {
+    let settings: Settings =
+        toml::from_str(include_str!("settings.toml")).expect("Could not parse settings");
+
+    info!("{:#?}", settings);
+
     App::new()
         .insert_resource(GlobalEffects::default())
         .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
@@ -46,7 +69,7 @@ fn main() {
             primary_window: Some(Window {
                 title: "Ahex".into(),
                 resizable: false,
-                resolution: WindowResolution::new(1280, 720),
+                resolution: WindowResolution::new(settings.display.width, settings.display.height),
                 canvas: Some("#bevy".to_owned()),
                 desired_maximum_frame_latency: core::num::NonZero::new(1u32),
                 ..default()
@@ -64,7 +87,10 @@ fn main() {
                 (build_level, create_the_sun).after(setup),
             ),
         )
-        .add_systems(PostStartup, enable_water_shadows)
+        .add_systems(
+            PostStartup,
+            enable_water_shadows.run_if(move || settings.display.water.shadows_enabled),
+        )
         .add_systems(
             Update,
             (
