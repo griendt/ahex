@@ -216,17 +216,29 @@ pub fn apply_player_movement(
                     player_tile.y += movement.offset.y as isize;
                     player_tile.z += movement.offset.z as isize;
 
-                    movement.animation_percentage = 0.0;
+                    movement.animation_percentage -= 1.0;
 
+                    let next_tile = (
+                        player_tile.x + movement.offset.x as isize,
+                        player_tile.y + movement.offset.y as isize,
+                        player_tile.z + movement.offset.z as isize,
+                    );
+
+                    // If the player is landing on an icy tile,
+                    // and the player can continue onwards, then
+                    // make the player slide onward.
                     if tiles.iter().any(|(_tile, is_icy, tile)| {
                         is_icy.is_some()
                             && tile.x == player_tile.x
                             && tile.y == player_tile.y
                             && tile.z == player_tile.z
+                    }) && tiles.iter().any(|(_tile, _is_icy, tile)| {
+                        tile.is_on_top
+                            && tile.x == next_tile.0
+                            && tile.y <= next_tile.1
+                            && tile.z == next_tile.2
                     }) {
-                        info!("Icy tile! Whoo!");
-                        // In case of landing on an icy tile, restart movement.
-                        // FIXME: check if it is even possible to contineu moving (bumping into wall etc.)
+                        all_moving_players_finished_moving = false;
                         continue;
                     }
 

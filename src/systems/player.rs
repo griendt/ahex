@@ -90,22 +90,6 @@ pub fn player_controls(
             continue;
         }
 
-        // if !tiles.iter().any(|tile| {
-        //     tile.1.is_on_top
-        //         && tile.1.x == player.1.x
-        //         && tile.1.y == player.1.y
-        //         && tile.1.z == player.1.z
-        // }) {
-        //     // Player is not currently standing. Disable movement and start falling instead!
-        //     commands.entity(player.3).insert(Movement {
-        //         animation_percentage: 0.0,
-        //         movement_speed: player.1.falling_speed,
-        //         offset: Vec3::new(0.0, -1.0, 0.0),
-        //     });
-
-        //     continue;
-        // }
-
         let mut movement_direction: Option<MovementDirection> = None;
 
         if keys.just_pressed(KeyCode::KeyA) {
