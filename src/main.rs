@@ -71,7 +71,6 @@ fn main() {
                 resizable: false,
                 resolution: WindowResolution::new(settings.display.width, settings.display.height),
                 canvas: Some("#bevy".to_owned()),
-                desired_maximum_frame_latency: core::num::NonZero::new(1u32),
                 ..default()
             }),
             ..default()
