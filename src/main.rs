@@ -2,10 +2,9 @@ use bevy::{prelude::*, window::WindowResolution};
 use bevy_hanabi::HanabiPlugin;
 use bevy_polyline::PolylinePlugin;
 use bevy_water::{WaterPlugin, WaterSettings};
-use serde::Deserialize;
 
 use crate::{
-    resources::levels::LevelResource,
+    resources::{levels::LevelResource, settings::Settings},
     systems::{
         camera::move_camera,
         goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
@@ -27,23 +26,6 @@ mod components;
 mod resources;
 mod systems;
 
-#[derive(Deserialize, Debug)]
-struct Settings {
-    display: DisplaySettings,
-}
-
-#[derive(Deserialize, Debug)]
-struct DisplaySettings {
-    width: u32,
-    height: u32,
-    water: WaterDisplaySettings,
-}
-
-#[derive(Deserialize, Debug)]
-struct WaterDisplaySettings {
-    shadows_enabled: bool,
-}
-
 fn main() {
     let settings: Settings =
         toml::from_str(include_str!("settings.toml")).expect("Could not parse settings");
@@ -52,6 +34,7 @@ fn main() {
 
     App::new()
         .insert_resource(GlobalEffects::default())
+        .insert_resource(settings.clone())
         .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
         .insert_resource(LevelResource {
             current_level_number: 1,

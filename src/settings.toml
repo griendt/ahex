@@ -4,3 +4,10 @@ height = 480
 
 [display.water]
 shadows_enabled = true
+
+[display.sun]
+initial_time_of_day = 0.45
+seconds_per_day = 20
+shadows_enabled = true
+illuminance = 800.0
+illuminance_variation = 700.0
