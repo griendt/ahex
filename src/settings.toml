@@ -1,6 +1,6 @@
 [display]
-width = 640
-height = 480
+width = 1280
+height = 960
 
 [display.water]
 shadows_enabled = true
@@ -9,5 +9,5 @@ shadows_enabled = true
 initial_time_of_day = 0.45
 seconds_per_day = 20
 shadows_enabled = true
-illuminance = 800.0
-illuminance_variation = 700.0
+illuminance = 3000.0
+illuminance_variation = 1000.0

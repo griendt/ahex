@@ -30,7 +30,7 @@ pub fn create_the_sun(mut commands: Commands, sun: Option<Single<&Sun>>, setting
             color: Color::WHITE,
             ..default()
         },
-        Transform::from_xyz(-60.0, 100.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(-60.0, 800.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 
@@ -47,5 +47,5 @@ pub fn update_the_sun(
     sun.1.illuminance = settings.display.sun.illuminance
         - settings.display.sun.illuminance_variation * (TAU * sun.0.time_of_day).cos();
     sun.2.rotate_y(-TAU * day_fraction_passed);
-    sun.2.translation.y = -100.0 + 200.0 * sun.0.time_of_day;
+    sun.2.translation.y = -800.0 + 800.0 * sun.0.time_of_day;
 }

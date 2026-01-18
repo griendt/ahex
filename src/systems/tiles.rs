@@ -8,7 +8,7 @@ use crate::{
     components::{
         movement::Movement,
         player::{Player, PlayerFinishedMoving, PlayerStartedMoving},
-        tile::{Carriable, MovementMap, ShouldRenderMovementMapPolylines, Tile},
+        tile::{Carriable, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile},
         tile_coordinates::{TileCoordinates, tile_coordinates_to_transform_coordinates},
     },
     resources::levels::LevelState,
@@ -196,7 +196,7 @@ pub fn apply_movement_map(
 pub fn apply_player_movement(
     mut commands: Commands,
     players: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
-    tiles: Query<(&Tile, &TileCoordinates), Without<Player>>,
+    tiles: Query<(Option<&Tile>, Option<&IcyTile>, &TileCoordinates), Without<Player>>,
     level: Res<LevelResource>,
     timer: Res<Time>,
 ) {
@@ -217,6 +217,19 @@ pub fn apply_player_movement(
                     player_tile.z += movement.offset.z as isize;
 
                     movement.animation_percentage = 0.0;
+
+                    if tiles.iter().any(|(_tile, is_icy, tile)| {
+                        is_icy.is_some()
+                            && tile.x == player_tile.x
+                            && tile.y == player_tile.y
+                            && tile.z == player_tile.z
+                    }) {
+                        info!("Icy tile! Whoo!");
+                        // In case of landing on an icy tile, restart movement.
+                        // FIXME: check if it is even possible to contineu moving (bumping into wall etc.)
+                        continue;
+                    }
+
                     commands.entity(entity).remove::<Movement>();
 
                     // If there is no tile at the destination tile, the player is going to fall.
@@ -224,11 +237,11 @@ pub fn apply_player_movement(
                     // NOTE: We only do this in the `ProcessingPlayerInput` phase right now, because
                     // otherwise there is a race condition with moving tiles that finish moving and have their coordinates updated.
                     // This check should technically come _after_ those tiles are done moving.
-                    if !tiles.iter().any(|tile| {
-                        tile.1.is_on_top
-                            && tile.1.x == player_tile.x
-                            && tile.1.y == player_tile.y
-                            && tile.1.z == player_tile.z
+                    if !tiles.iter().any(|(_tile, _is_icy, tile)| {
+                        tile.is_on_top
+                            && tile.x == player_tile.x
+                            && tile.y == player_tile.y
+                            && tile.z == player_tile.z
                     }) && matches!(level.level_state, LevelState::ProcessingPlayerInput)
                     {
                         commands.entity(entity).insert(Movement {

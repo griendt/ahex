@@ -5,7 +5,7 @@ use bevy::{
         component::Component,
         system::{Commands, Res},
     },
-    light::PointLight,
+    light::{NotShadowCaster, PointLight},
     log::info,
     math::Vec3,
     scene::SceneRoot,
@@ -299,7 +299,7 @@ impl Level {
             asset_server.load(GltfAssetLabel::Scene(0).from_asset("tile_below.glb"));
         let icy_tile_asset = asset_server.load(GltfAssetLabel::Scene(0).from_asset("ice.glb"));
 
-        let bundle = (
+        commands.spawn((
             Tile {
                 color: Color::hsla(90.0, 0.8, (0.4 + 0.1 * y as f32).clamp(0.05, 1.0), 1.0),
             },
@@ -322,13 +322,22 @@ impl Level {
                 map: movement_map.clone(),
                 index: 0,
             },
-        );
+        ));
 
-        commands.spawn(bundle).with_children(|parent| {
-            if is_icy {
-                parent.spawn((IcyTile, SceneRoot(icy_tile_asset.clone())));
-            }
-        });
+        if is_icy {
+            commands.spawn((
+                IcyTile,
+                TileCoordinates {
+                    x: x,
+                    y: y,
+                    z: z,
+                    is_on_top: is_on_top,
+                    ..default()
+                },
+                NotShadowCaster,
+                SceneRoot(icy_tile_asset.clone()),
+            ));
+        }
 
         if y > 0 && is_pillar {
             self.get_tile_entity(
