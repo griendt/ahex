@@ -218,8 +218,6 @@ pub fn apply_movement(
                     && object.0.y == next_tile.1 + 1
                     && object.0.z == next_tile.2
             }) {
-                info!("Object is on an icy object");
-
                 all_moving_objects_finished_moving = false;
 
                 if is_player.is_some() {
