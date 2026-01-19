@@ -1,0 +1,23 @@
+[metadata]
+name = "Level 9"
+biome = "DAYLIGHT"
+help_text = "9"
+
+[[layers]]
+pillars = trues
+height_map = """
+.11....
+.1.1...
+1111.1.
+.111111
+.1...1.
+..1111.
+"""
+modifiers = ["""
+.......
+.I.....
+PII....
+.IGIII.
+.....I.
+...II..
+"""]

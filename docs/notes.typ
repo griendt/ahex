@@ -82,6 +82,8 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
 - [x] The controls (`W/E/A/D/Z/X`) should adapt based on the angle of the camera. Otherwise controls are too confusing for the player if the camera is rotated.
 - [x] The player should be able to restart a level using some button, remote from the usual controls. It could be a combination like `Ctrl+R`. Currently: `Backspace`.
   - [ ] If a level has become unwinnable (due to the player or the _banana_ falling into the water), the game should hint to use this restart combination.
+  - [ ] Players falling into water should despawn.
+  - [ ] If no player remains but there is at least one _banana_ left, the game will know that the level cannot be won.
 - [ ] The player should be able to undo his last moves with `R` or similar. To do this, we need to keep the state of the entire level for each step.
   - [ ] The player should be able to undo multiple moves as well.
 
