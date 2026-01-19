@@ -5,7 +5,7 @@ use bevy::{ecs::component::Component, math::Vec3};
 /// with the specified offset. When the animation is
 /// finished, the TileCoordinates should be updated
 /// to reflect the final position after the movment.
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Debug)]
 pub struct Movement {
     pub offset: Vec3,
     pub movement_speed: f32,

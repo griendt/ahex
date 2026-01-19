@@ -1,7 +1,7 @@
 use bevy::ecs::{component::Component, event::Event};
 
 #[derive(Component)]
-pub struct Player {}
+pub struct Player;
 
 #[derive(Event)]
 pub struct PlayerStartedMoving {}

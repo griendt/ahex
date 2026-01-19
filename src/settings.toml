@@ -1,17 +1,17 @@
-initial_level_number = 6
+initial_level_number = 8
 
 [display]
-width = 1280
-height = 960
+width = 800
+height = 600
 
 [display.water]
-shadows_enabled = true
+shadows_enabled = false
 
 [display.sun]
 height = 20.0
 height_variation = 20.0
 initial_time_of_day = 0.45
-seconds_per_day = 20
-shadows_enabled = true
+seconds_per_day = 3600
+shadows_enabled = false
 illuminance = 3000.0
 illuminance_variation = 1000.0

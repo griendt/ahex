@@ -9,7 +9,10 @@ pub struct Tile {
 pub struct IcyTile;
 
 #[derive(Component)]
-pub struct Carriable {}
+pub struct HasGravity;
+
+#[derive(Component)]
+pub struct Carriable;
 
 #[derive(Component)]
 pub struct MovementMap {

@@ -8,7 +8,9 @@ use crate::{
     components::{
         movement::Movement,
         player::{Player, PlayerFinishedMoving, PlayerStartedMoving},
-        tile::{Carriable, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile},
+        tile::{
+            Carriable, HasGravity, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile,
+        },
         tile_coordinates::{TileCoordinates, tile_coordinates_to_transform_coordinates},
     },
     resources::levels::LevelState,
@@ -50,7 +52,6 @@ pub fn colorize_tiles(
 }
 
 pub fn patch_icy_tile_texture(
-    mut commands: Commands,
     query: Query<(Entity, &IcyTile)>,
     children: Query<&Children>,
     mesh_materials: Query<(&MeshMaterial3d<StandardMaterial>, &GltfMaterialName)>,
@@ -120,176 +121,146 @@ pub fn draw_moving_tiles_polylines(
     }
 }
 
-pub fn on_player_finished_moving(
-    _event: On<PlayerFinishedMoving>,
-    mut level: ResMut<LevelResource>,
-) {
-    level.level_state = LevelState::ProcessingLevelEffects;
-}
-
 pub fn on_player_started_moving(_event: On<PlayerStartedMoving>, mut level: ResMut<LevelResource>) {
     level.level_state = LevelState::ProcessingPlayerInput;
 }
 
-pub fn apply_movement_map(
-    query: Query<(&mut Transform, &mut TileCoordinates, &mut MovementMap), Without<Carriable>>,
+pub fn on_players_finished_moving(
+    _event: On<PlayerFinishedMoving>,
+    query: Query<
+        (
+            &TileCoordinates,
+            &mut MovementMap,
+            Option<&Movement>,
+            Entity,
+        ),
+        Without<Carriable>,
+    >,
     carriables: Query<(&TileCoordinates, &Carriable, Entity), Without<Movement>>,
-    timer: Res<Time>,
-    mut commands: Commands,
     mut level: ResMut<LevelResource>,
+    mut commands: Commands,
 ) {
-    if !matches!(level.level_state, LevelState::ProcessingLevelEffects) {
-        return;
-    }
+    level.level_state = LevelState::ProcessingLevelEffects;
 
-    let sqrt3 = 3f32.sqrt();
-    let mut exists_unfinished_movement_map = false;
-
-    for (mut transform, mut tile, mut movement_map) in query {
-        if movement_map.map.is_empty() {
+    // Apply movement maps
+    for (tile, mut movement_map, existing_movement, entity) in query {
+        if movement_map.map.is_empty() || existing_movement.is_some() {
             continue;
         }
 
         let offset = movement_map.map[movement_map.index % movement_map.map.len()];
-        let animation_percentage = tile
-            .movement_animation_percentage
-            .unwrap_or_default()
-            .clamp(0.0, 1.0);
+
+        let movement = Movement {
+            offset: Vec3::new(offset.0 as f32, offset.1 as f32, offset.2 as f32),
+            movement_speed: tile.movement_speed,
+            animation_percentage: 0.0,
+        };
+
+        commands.entity(entity).insert(movement.clone());
+        movement_map.index += 1;
 
         for (carriable_coordinates, _carriable, carriable_entity) in carriables {
             if carriable_coordinates.x == tile.x
                 && carriable_coordinates.y == tile.y
                 && carriable_coordinates.z == tile.z
             {
-                // NOTE: The player starts moving here but we do NOT fire the `PlayerStartedMoving` event.
-                // This is because we want to trigger this event only if caused by the player pressing a movement key.
-                commands.entity(carriable_entity).insert(Movement {
-                    offset: Vec3::new(offset.0 as f32, offset.1 as f32, offset.2 as f32),
-                    movement_speed: tile.movement_speed,
-                    animation_percentage: animation_percentage,
-                });
+                commands.entity(carriable_entity).insert(movement.clone());
             }
         }
-
-        // If animation is finished, set the actual coordinates and stop animating.
-        if animation_percentage >= 1.0 {
-            tile.x += offset.0;
-            tile.y += offset.1;
-            tile.z += offset.2;
-            movement_map.index += 1;
-            tile.movement_animation_percentage = None;
-        } else {
-            exists_unfinished_movement_map = true;
-        }
-
-        transform.translation = tile_coordinates_to_transform_coordinates(&Vec3::new(
-            tile.x as f32,
-            tile.y as f32,
-            tile.z as f32,
-        ));
-
-        // A tile's width is 0.6 so if an object is supposed to be on top of the tile, grant it +0.2 on the z-axis.
-        if tile.is_on_top {
-            transform.translation.y += 0.6;
-        }
-
-        // Display the entity percentually towards the destination coordinates, if animating.
-        if animation_percentage < 1.0 {
-            transform.translation.x +=
-                animation_percentage * (sqrt3 * (offset.0 as f32 + offset.2 as f32 / 2f32) as f32);
-            transform.translation.y += animation_percentage * (0.8 * offset.1 as f32);
-            transform.translation.z += animation_percentage * (offset.2 as f32 * -1.5);
-        }
-
-        // Apply any further visual offset
-        transform.translation += tile.visual_offset;
-
-        tile.movement_animation_percentage = Some(
-            (tile.movement_animation_percentage.unwrap_or_default()
-                + tile.movement_speed * timer.delta_secs())
-            .clamp(0.0, 1.0),
-        );
-    }
-
-    // If all movement maps have finished, we can process the new player input.
-    if !exists_unfinished_movement_map {
-        level.level_state = LevelState::WaitingForPlayerInput;
     }
 }
 
-pub fn apply_player_movement(
+pub fn apply_movement(
     mut commands: Commands,
-    players: Query<(&mut TileCoordinates, Option<&mut Movement>, Entity), With<Player>>,
-    tiles: Query<(Option<&Tile>, Option<&IcyTile>, &TileCoordinates), Without<Player>>,
-    level: Res<LevelResource>,
+    moving_objects: Query<(
+        &mut TileCoordinates,
+        &mut Movement,
+        Option<&HasGravity>,
+        Option<&Player>,
+        Entity,
+    )>,
+    still_objects: Query<(&TileCoordinates, Option<&Tile>, Option<&IcyTile>), Without<Movement>>,
+    mut level: ResMut<LevelResource>,
     timer: Res<Time>,
 ) {
     let mut all_moving_players_finished_moving = true;
+    let mut all_moving_objects_finished_moving = true;
 
-    for (mut player_tile, movement, entity) in players {
-        match movement {
-            Some(mut movement) => {
-                let animation_percentage = movement.animation_percentage;
-                movement.animation_percentage = (movement.animation_percentage
-                    + movement.movement_speed * timer.delta_secs())
-                .clamp(0., 1.);
+    for (mut tile_coordinates, mut movement, has_gravity, is_player, entity) in moving_objects {
+        let animation_percentage = movement.animation_percentage;
+        movement.animation_percentage = (movement.animation_percentage
+            + movement.movement_speed * timer.delta_secs())
+        .clamp(0., 1.);
 
-                // If animation is finished, set the actual coordinates and stop animating.
-                if animation_percentage >= 1.0 {
-                    player_tile.x += movement.offset.x as isize;
-                    player_tile.y += movement.offset.y as isize;
-                    player_tile.z += movement.offset.z as isize;
+        // If animation is finished, set the actual coordinates and stop animating.
+        if animation_percentage >= 1.0 {
+            tile_coordinates.x += movement.offset.x as isize;
+            tile_coordinates.y += movement.offset.y as isize;
+            tile_coordinates.z += movement.offset.z as isize;
 
-                    movement.animation_percentage -= 1.0;
+            movement.animation_percentage -= 1.0;
 
-                    let next_tile = (
-                        player_tile.x + movement.offset.x as isize,
-                        player_tile.y + movement.offset.y as isize,
-                        player_tile.z + movement.offset.z as isize,
-                    );
+            let next_tile = (
+                tile_coordinates.x + movement.offset.x as isize,
+                tile_coordinates.y + movement.offset.y as isize,
+                tile_coordinates.z + movement.offset.z as isize,
+            );
 
-                    // If the player is landing on an icy tile,
-                    // and the player can continue onwards, then
-                    // make the player slide onward.
-                    if tiles.iter().any(|(_tile, is_icy, tile)| {
-                        is_icy.is_some()
-                            && tile.x == player_tile.x
-                            && tile.y == player_tile.y
-                            && tile.z == player_tile.z
-                    }) && !tiles.iter().any(|(_tile, _is_icy, tile)| {
-                        tile.x == next_tile.0 && tile.y == next_tile.1 + 1 && tile.z == next_tile.2
-                    }) {
-                        all_moving_players_finished_moving = false;
-                        continue;
-                    }
+            // If the object is landing on an icy tile, and it can continue onwards, then make it slide onward.
+            if still_objects.iter().any(|object| {
+                object.2.is_some()
+                    && object.0.x == tile_coordinates.x
+                    && object.0.y == tile_coordinates.y
+                    && object.0.z == tile_coordinates.z
+            }) && !still_objects.iter().any(|object| {
+                object.1.is_some()
+                    && object.0.x == next_tile.0
+                    && object.0.y == next_tile.1 + 1
+                    && object.0.z == next_tile.2
+            }) {
+                info!("Object is on an icy object");
 
-                    commands.entity(entity).remove::<Movement>();
+                all_moving_objects_finished_moving = false;
 
-                    // If there is no tile at the destination tile, the player is going to fall.
-                    // This also means we should not yet trigger a `PlayerFinishedMoving` event.
-                    // NOTE: We only do this in the `ProcessingPlayerInput` phase right now, because
-                    // otherwise there is a race condition with moving tiles that finish moving and have their coordinates updated.
-                    // This check should technically come _after_ those tiles are done moving.
-                    if !tiles.iter().any(|(_tile, _is_icy, tile)| {
-                        tile.is_on_top
-                            && tile.x == player_tile.x
-                            && tile.y == player_tile.y
-                            && tile.z == player_tile.z
-                    }) && matches!(level.level_state, LevelState::ProcessingPlayerInput)
-                    {
-                        commands.entity(entity).insert(Movement {
-                            offset: Vec3::new(0., -1., 0.),
-                            movement_speed: player_tile.falling_speed,
-                            animation_percentage: 0.0,
-                        });
+                if is_player.is_some() {
+                    all_moving_players_finished_moving = false;
+                }
+                continue;
+            }
 
-                        all_moving_players_finished_moving = false;
-                    }
-                } else {
+            commands.entity(entity).remove::<Movement>();
+
+            // If there is no tile at the destination tile, the object is going to fall.
+            // NOTE: We only do this in the `ProcessingPlayerInput` phase right now, because
+            // otherwise there is a race condition with moving tiles that finish moving and have their coordinates updated.
+            // This check should technically come _after_ those tiles are done moving.
+            if has_gravity.is_some()
+                && !still_objects.iter().any(|object| {
+                    object.0.is_on_top
+                        && object.0.x == tile_coordinates.x
+                        && object.0.y == tile_coordinates.y
+                        && object.0.z == tile_coordinates.z
+                })
+                && matches!(level.level_state, LevelState::ProcessingPlayerInput)
+            {
+                commands.entity(entity).insert(Movement {
+                    offset: Vec3::new(0., -1., 0.),
+                    movement_speed: tile_coordinates.falling_speed,
+                    animation_percentage: 0.0,
+                });
+
+                all_moving_objects_finished_moving = false;
+
+                if is_player.is_some() {
                     all_moving_players_finished_moving = false;
                 }
             }
-            None => {}
+        } else {
+            all_moving_objects_finished_moving = false;
+
+            if is_player.is_some() {
+                all_moving_players_finished_moving = false;
+            }
         }
     }
 
@@ -297,6 +268,12 @@ pub fn apply_player_movement(
         && matches!(level.level_state, LevelState::ProcessingPlayerInput)
     {
         commands.trigger(PlayerFinishedMoving {});
+    }
+
+    if all_moving_objects_finished_moving
+        && matches!(level.level_state, LevelState::ProcessingLevelEffects)
+    {
+        level.level_state = LevelState::WaitingForPlayerInput;
     }
 }
 

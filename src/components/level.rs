@@ -23,7 +23,7 @@ use serde::Deserialize;
 use crate::components::{
     goal::Goal,
     player::Player,
-    tile::{Carriable, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile},
+    tile::{Carriable, HasGravity, IcyTile, MovementMap, ShouldRenderMovementMapPolylines, Tile},
     tile_coordinates::TileCoordinates,
 };
 
@@ -232,8 +232,9 @@ impl Level {
         asset_server: &Res<AssetServer>,
     ) {
         commands.spawn((
-            Player {},
-            Carriable {},
+            Player,
+            Carriable,
+            HasGravity,
             LevelEntityMarker,
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("ball.glb"))),
             TileCoordinates {
@@ -259,7 +260,8 @@ impl Level {
         asset_server: &Res<AssetServer>,
     ) {
         commands.spawn((
-            Goal {},
+            Goal,
+            Carriable,
             LevelEntityMarker,
             SceneRoot(asset_server.load(GltfAssetLabel::Scene(0).from_asset("banana.glb"))),
             TileCoordinates {

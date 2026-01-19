@@ -13,8 +13,8 @@ use crate::{
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{enable_water_shadows, setup, setup_effects},
         tiles::{
-            apply_movement_map, apply_player_movement, colorize_tiles, draw_moving_tiles_polylines,
-            on_player_finished_moving, on_player_started_moving, patch_icy_tile_texture,
+            apply_movement, colorize_tiles, draw_moving_tiles_polylines, on_player_started_moving,
+            on_players_finished_moving, patch_icy_tile_texture,
             set_transform_based_on_tile_coordinates,
         },
     },
@@ -85,17 +85,16 @@ fn main() {
                 patch_icy_tile_texture,
                 draw_moving_tiles_polylines.run_if(|| false),
                 collect_goals,
-                apply_player_movement,
+                apply_movement,
                 restart_level,
                 go_to_next_level,
                 show_level_complete,
                 update_the_sun,
-                player_controls.after(apply_player_movement),
+                player_controls.after(apply_movement),
                 set_transform_based_on_tile_coordinates,
-                apply_movement_map,
             ),
         )
-        .add_observer(on_player_finished_moving)
+        .add_observer(on_players_finished_moving)
         .add_observer(on_player_started_moving)
         .run();
 }
