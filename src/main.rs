@@ -14,7 +14,7 @@ use crate::{
         setup::{enable_water_shadows, setup, setup_effects},
         tiles::{
             apply_movement_map, apply_player_movement, colorize_tiles, draw_moving_tiles_polylines,
-            on_player_finished_moving, on_player_started_moving,
+            on_player_finished_moving, on_player_started_moving, patch_icy_tile_texture,
             set_transform_based_on_tile_coordinates,
         },
     },
@@ -35,9 +35,9 @@ fn main() {
     App::new()
         .insert_resource(GlobalEffects::default())
         .insert_resource(settings.clone())
-        .insert_resource(ClearColor(Color::hsl(200.0, 0.1, 0.15)))
+        .insert_resource(ClearColor(Color::hsl(200.0, 0.0, 0.3)))
         .insert_resource(LevelResource {
-            current_level_number: 1,
+            current_level_number: settings.initial_level_number,
             ..default()
         })
         .insert_resource(WaterSettings {
@@ -82,6 +82,7 @@ fn main() {
                 move_camera,
                 rotate_goal,
                 colorize_tiles,
+                patch_icy_tile_texture,
                 draw_moving_tiles_polylines.run_if(|| false),
                 collect_goals,
                 apply_player_movement,

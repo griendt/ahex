@@ -1,0 +1,22 @@
+[metadata]
+name = "Level 7"
+biome = "DAYLIGHT"
+help_text = ""
+
+[[layers]]
+pillars = true
+height_map = """
+32567
+"""
+modifiers = ["""
+P...G
+"""", """
+MMMMM
+"""]
+movement_maps = [
+    [[0, -1, 0], [0, 1, 0]],
+    [[0, 1, 0], [0, -1, 0]],
+    [[0, 4, 0], [0, 1, 0], [0, -5, 0]],
+    [[0, 4, 0], [0, 1, 0], [0, -5, 0]],
+    [[0, 4, 0], [0, 1, 0], [0, -5, 0]],
+]

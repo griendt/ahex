@@ -49,6 +49,30 @@ pub fn colorize_tiles(
     }
 }
 
+pub fn patch_icy_tile_texture(
+    mut commands: Commands,
+    query: Query<(Entity, &IcyTile)>,
+    children: Query<&Children>,
+    mesh_materials: Query<(&MeshMaterial3d<StandardMaterial>, &GltfMaterialName)>,
+    mut asset_materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for (entity, _tile) in &query {
+        for descendant in children.iter_descendants(entity) {
+            let Ok((id, _material_name)) = mesh_materials.get(descendant) else {
+                continue;
+            };
+
+            let Some(material) = asset_materials.get_mut(id.id()) else {
+                continue;
+            };
+
+            // info!("Got icy tile, the refletance is {:?}", material);
+            // material.base_color = Color::linear_rgba(1.0, 1.0, 1.0, 0.2);
+            material.specular_transmission = -50.;
+        }
+    }
+}
+
 pub fn draw_moving_tiles_polylines(
     mut commands: Commands,
     mut polyline_materials: ResMut<Assets<PolylineMaterial>>,
@@ -232,11 +256,8 @@ pub fn apply_player_movement(
                             && tile.x == player_tile.x
                             && tile.y == player_tile.y
                             && tile.z == player_tile.z
-                    }) && tiles.iter().any(|(_tile, _is_icy, tile)| {
-                        tile.is_on_top
-                            && tile.x == next_tile.0
-                            && tile.y <= next_tile.1
-                            && tile.z == next_tile.2
+                    }) && !tiles.iter().any(|(_tile, _is_icy, tile)| {
+                        tile.x == next_tile.0 && tile.y == next_tile.1 + 1 && tile.z == next_tile.2
                     }) {
                         all_moving_players_finished_moving = false;
                         continue;

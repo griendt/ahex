@@ -3,6 +3,7 @@ use serde::Deserialize;
 
 #[derive(Resource, Deserialize, Clone, Debug)]
 pub struct Settings {
+    pub initial_level_number: isize,
     pub display: DisplaySettings,
 }
 
@@ -21,6 +22,8 @@ pub struct WaterDisplaySettings {
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct SunDisplaySettings {
+    pub height: f32,
+    pub height_variation: f32,
     pub illuminance: f32,
     pub illuminance_variation: f32,
     pub initial_time_of_day: f32,

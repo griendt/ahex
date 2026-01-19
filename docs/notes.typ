@@ -81,14 +81,14 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
 - [x] The camera should rotate only in intervals of $pi/3$ radians at a time, so that the hexagons always end up looking the same. Of course this transition should be fluent.
 - [x] The controls (`W/E/A/D/Z/X`) should adapt based on the angle of the camera. Otherwise controls are too confusing for the player if the camera is rotated.
 - [x] The player should be able to restart a level using some button, remote from the usual controls. It could be a combination like `Ctrl+R`. Currently: `Backspace`.
-  - [ ] If a level has become unwinnable (due to the player or the _star_ falling into the water), the game should hint to use this restart combination.
+  - [ ] If a level has become unwinnable (due to the player or the _banana_ falling into the water), the game should hint to use this restart combination.
 - [ ] The player should be able to undo his last moves with `R` or similar. To do this, we need to keep the state of the entire level for each step.
   - [ ] The player should be able to undo multiple moves as well.
 
 = Puzzle ideas
-- [x] The objective is a _star_. Upon collecting the _star_, the level is completed.
-  - [ ] Levels may be replayable by implementing a secondary _star_ after completion. I'm not sure yet if I want to do this for every level.
-  - [ ] A _star_ is subject to physics just like the player. Hence, a _star_ can fall down or be lost to the abyss.
+- [x] The objective is a _banana_. Upon collecting the _banana_, the level is completed.
+  - [ ] Levels may be replayable by implementing a secondary _banana_ after completion. I'm not sure yet if I want to do this for every level.
+  - [ ] A _banana_ is subject to physics just like the player. Hence, a _banana_ can fall down or be lost to the abyss.
 - [x] The player can fall _down_, but not jump _up_. This causes a significant asymmetry for the _y_ axis.
 - [ ] The player has a certain height. This disallows him from squeezing between two tiles (one above the other) if there isn't enough height left.
 - [x] Tiles can be programmed to move along a _path_. This can have multiple sub-variants:
@@ -99,7 +99,7 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
         Of course this path _should_ return to the tile's original position, although this is not a strict requirement.
   - [x] If the player is on a tile that is moving, the player should move along with it.
     - [ ] This should keep in mind collisions, e.g. the player can be shoved off it it hits a wall along the way.
-- [ ] Tiles may be _slippery_. If the player moves on them, the player will continue to move until an end is reached (wall, or edge of the map).
+- [x] Tiles may be _slippery_. If the player moves on them, the player will continue to move until an end is reached (wall, or edge of the map).
 - [ ] Tiles may be _fragile_. After the player has stepped on it, it will crumble as soon as the player steps off it.
   - [ ] Some _fragile_ tiles might be rechargable.
 - [ ] _Crates_ are solid objects that the player can't traverse through, but can push. A push is only possible if the crate can occupy the target hex.
@@ -119,7 +119,7 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
 - [x] Tiles can be applied one or multiple sets of _modifiers_. Modifiers include:
   - [x] Has a player on top of it
   - [x] Has a goal on top of it
-  - [ ] Is slippery
+  - [x] Is slippery
   - [ ] Is fragile
   - [ ] Has a crate on top of it
   - [ ] Is a trampoline

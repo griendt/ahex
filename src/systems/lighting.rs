@@ -25,12 +25,12 @@ pub fn create_the_sun(mut commands: Commands, sun: Option<Single<&Sun>>, setting
         DirectionalLight {
             shadows_enabled: settings.display.sun.shadows_enabled,
             soft_shadow_size: None,
-            affects_lightmapped_mesh_diffuse: false,
+            affects_lightmapped_mesh_diffuse: true,
             illuminance: settings.display.sun.illuminance,
             color: Color::WHITE,
             ..default()
         },
-        Transform::from_xyz(-60.0, 800.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(-60.0, 100.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 
@@ -47,5 +47,6 @@ pub fn update_the_sun(
     sun.1.illuminance = settings.display.sun.illuminance
         - settings.display.sun.illuminance_variation * (TAU * sun.0.time_of_day).cos();
     sun.2.rotate_y(-TAU * day_fraction_passed);
-    sun.2.translation.y = -800.0 + 800.0 * sun.0.time_of_day;
+    sun.2.translation.y = settings.display.sun.height
+        + settings.display.sun.height_variation * (TAU * sun.0.time_of_day).cos();
 }

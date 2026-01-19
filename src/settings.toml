@@ -1,3 +1,5 @@
+initial_level_number = 6
+
 [display]
 width = 1280
 height = 960
@@ -6,6 +8,8 @@ height = 960
 shadows_enabled = true
 
 [display.sun]
+height = 20.0
+height_variation = 20.0
 initial_time_of_day = 0.45
 seconds_per_day = 20
 shadows_enabled = true
