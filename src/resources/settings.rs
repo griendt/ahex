@@ -13,6 +13,7 @@ pub struct DisplaySettings {
     pub height: u32,
     pub water: WaterDisplaySettings,
     pub sun: SunDisplaySettings,
+    pub level_complete: LevelCompleteDisplaySettings,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -29,4 +30,10 @@ pub struct SunDisplaySettings {
     pub initial_time_of_day: f32,
     pub seconds_per_day: usize,
     pub shadows_enabled: bool,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct LevelCompleteDisplaySettings {
+    pub hue_change_speed: f32,
+    pub font_size: f32,
 }

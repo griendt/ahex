@@ -1,4 +1,4 @@
-initial_level_number = 9
+initial_level_number = 1
 
 [display]
 width = 800
@@ -15,3 +15,7 @@ seconds_per_day = 3600
 shadows_enabled = true
 illuminance = 3000.0
 illuminance_variation = 1000.0
+
+[display.level_complete]
+hue_change_speed = 120.0
+font_size = 70.0

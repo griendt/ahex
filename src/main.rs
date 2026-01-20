@@ -8,7 +8,10 @@ use crate::{
     systems::{
         camera::move_camera,
         goal::{add_goal_bloom, rotate_goal, vary_goal_intensity},
-        level::{build_level, go_to_next_level, restart_level, show_level_complete},
+        level::{
+            build_level, go_to_next_level, restart_level, show_level_complete,
+            update_level_complete_color,
+        },
         lighting::{create_the_sun, update_the_sun},
         player::{add_player_bloom, collect_goals, player_controls},
         setup::{enable_water_shadows, setup, setup_effects},
@@ -89,6 +92,7 @@ fn main() {
                 restart_level,
                 go_to_next_level,
                 show_level_complete,
+                update_level_complete_color,
                 update_the_sun,
                 player_controls.after(apply_movement),
                 set_transform_based_on_tile_coordinates,

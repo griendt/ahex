@@ -5,7 +5,10 @@ use crate::{
         goal::Goal,
         level::{Level, LevelCompleteTextMarker, LevelEntityMarker},
     },
-    resources::levels::{LevelResource, LevelState},
+    resources::{
+        levels::{LevelResource, LevelState},
+        settings::Settings,
+    },
 };
 
 pub fn build_level(
@@ -70,6 +73,7 @@ pub fn show_level_complete(
     goals: Query<&Goal>,
     level_complete_marker: Option<Single<&LevelCompleteTextMarker>>,
     asset_server: Res<AssetServer>,
+    settings: Res<Settings>,
 ) {
     if !goals.is_empty() {
         return;
@@ -98,7 +102,7 @@ pub fn show_level_complete(
                 Text::new("Level Complete!"),
                 TextFont {
                     font: asset_server.load("fonts/main.ttf"),
-                    font_size: 60.0,
+                    font_size: settings.display.level_complete.font_size,
                     ..default()
                 },
                 TextShadow::default(),
@@ -135,4 +139,15 @@ pub fn show_level_complete(
                 LevelEntityMarker,
             ));
         });
+}
+
+pub fn update_level_complete_color(
+    mut level_complete_marker: Single<(&LevelCompleteTextMarker, &mut TextColor)>,
+    timer: Res<Time>,
+    settings: Res<Settings>,
+) {
+    let current_hue = level_complete_marker.1.hue();
+    level_complete_marker.1.set_hue(
+        current_hue + timer.delta_secs() * settings.display.level_complete.hue_change_speed,
+    );
 }

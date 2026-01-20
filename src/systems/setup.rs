@@ -125,7 +125,7 @@ pub fn enable_water_shadows(
     mut commands: Commands,
     query: Query<(&WaterTile, Entity), With<NotShadowReceiver>>,
 ) {
-    for water_tile in query {
-        commands.entity(water_tile.1).remove::<NotShadowReceiver>();
+    for (_water_tile, entity) in query {
+        commands.entity(entity).remove::<NotShadowReceiver>();
     }
 }

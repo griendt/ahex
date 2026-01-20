@@ -86,6 +86,8 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
   - [ ] If no player remains but there is at least one _banana_ left, the game will know that the level cannot be won.
 - [ ] The player should be able to undo his last moves with `R` or similar. To do this, we need to keep the state of the entire level for each step.
   - [ ] The player should be able to undo multiple moves as well.
+- [ ] The level is only completed if all _bananas_ are captured *and* all players have stopped moving *and* there is at least one player left.
+  - This can make for some interesting levels where players must be sacrificed (but not all), and create traps where the _banana_ can be captuerd, but only at the expense of the last remaining player.s
 
 = Puzzle ideas
 - [x] The objective is a _banana_. Upon collecting the _banana_, the level is completed.
