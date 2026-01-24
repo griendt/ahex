@@ -3,19 +3,23 @@ initial_level_number = 1
 [display]
 width = 800
 height = 600
-
-[display.water]
-shadows_enabled = true
+water.shadows_enabled = true
 
 [display.sun]
 height = 20.0
-height_variation = 20.0
-initial_time_of_day = 0.45
-seconds_per_day = 3600
+height_variation = 19.9
+initial_time_of_day = 0.0
+seconds_per_day = 60
 shadows_enabled = true
-illuminance = 3000.0
-illuminance_variation = 1000.0
+illuminance = 10000.0
 
 [display.level_complete]
 hue_change_speed = 120.0
 font_size = 70.0
+
+[camera]
+rotation_speed = 3.0
+bloom.intensity = 0.1
+bloom.low_frequency_boost = 0.7
+bloom.low_frequency_boost_curvature = 0.95
+bloom.high_pass_frequency = 0.5

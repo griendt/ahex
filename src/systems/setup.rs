@@ -5,12 +5,12 @@ use bevy::{
     ecs::{
         entity::Entity,
         query::With,
-        system::{Commands, Query, ResMut},
+        system::{Commands, Query, Res, ResMut},
     },
     light::NotShadowReceiver,
     math::{Vec2, Vec3, Vec4},
     mesh::{Mesh, MeshBuilder, SphereKind, SphereMeshBuilder},
-    post_process::bloom::{Bloom, BloomCompositeMode, BloomPrefilter},
+    post_process::bloom::{Bloom, BloomCompositeMode},
     transform::components::Transform,
     utils::default,
 };
@@ -21,29 +21,29 @@ use bevy_hanabi::{
 };
 use bevy_water::WaterTile;
 
-use crate::{components::camera::CameraAngle, resources::effects::GlobalEffects};
+use crate::{
+    components::camera::CameraAngle,
+    resources::{effects::GlobalEffects, settings::Settings},
+};
 
-pub fn setup(mut commands: Commands) {
+pub fn setup(mut commands: Commands, settings: Res<Settings>) {
     commands.spawn((
         Camera3d::default(),
         CameraAngle {
-            rotation_speed: 3.0,
+            rotation_speed: settings.camera.rotation_speed,
             ..default()
         },
         Transform::from_xyz(0.0, 16.0, 12.0).looking_at(Vec3::ZERO, Vec3::Y),
         Tonemapping::TonyMcMapface,
         Bloom {
-            intensity: 0.05,
-            low_frequency_boost: 0.95,
-            low_frequency_boost_curvature: 0.5,
-            high_pass_frequency: 0.5,
-            prefilter: BloomPrefilter {
-                threshold: 0.0,
-                threshold_softness: 1.0,
-            },
-            composite_mode: BloomCompositeMode::Additive,
+            intensity: settings.camera.bloom.intensity,
+            low_frequency_boost: settings.camera.bloom.low_frequency_boost,
+            low_frequency_boost_curvature: settings.camera.bloom.low_frequency_boost_curvature,
+            high_pass_frequency: settings.camera.bloom.high_pass_frequency,
+            composite_mode: BloomCompositeMode::EnergyConserving,
             max_mip_dimension: 512,
             scale: Vec2::ONE,
+            ..default()
         },
     ));
 }

@@ -1,9 +1,9 @@
-use std::f32::consts::TAU;
+use std::f32::{consts::TAU};
 
 use bevy::{
     color::Color,
     ecs::system::{Commands, Res, Single},
-    light::DirectionalLight,
+    light::{DirectionalLight},
     math::Vec3,
     time::Time,
     transform::components::Transform,
@@ -30,7 +30,7 @@ pub fn create_the_sun(mut commands: Commands, sun: Option<Single<&Sun>>, setting
             color: Color::WHITE,
             ..default()
         },
-        Transform::from_xyz(-60.0, 100.0, 20.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(5.0, 10.0, -5.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 
@@ -44,9 +44,15 @@ pub fn update_the_sun(
     sun.0.time_of_day += day_fraction_passed;
     sun.0.time_of_day = sun.0.time_of_day.fract();
 
-    sun.1.illuminance = settings.display.sun.illuminance
-        - settings.display.sun.illuminance_variation * (TAU * sun.0.time_of_day).cos();
-    sun.2.rotate_y(-TAU * day_fraction_passed);
-    sun.2.translation.y = settings.display.sun.height
-        + settings.display.sun.height_variation * (TAU * sun.0.time_of_day).cos();
+
+    sun.2.translation.x = -5.0 * (TAU * sun.0.time_of_day).cos();
+    sun.2.translation.y = settings.display.sun.height - settings.display.sun.height_variation * (TAU * sun.0.time_of_day).cos();
+    sun.2.translation.z = 5.0 * (TAU * sun.0.time_of_day).sin();
+    sun.2.look_at(Vec3::ZERO, Vec3::Y);
+
+    sun.1.illuminance = match sun.2.translation.y < 0.0 {
+        true => 0.0,
+        false =>  settings.display.sun.illuminance
+    };
+
 }
