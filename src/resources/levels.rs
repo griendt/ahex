@@ -16,14 +16,14 @@ pub enum LevelState {
 
 #[derive(Resource, Default)]
 pub struct LevelResource {
-    pub current_level_number: isize,
+    pub current_level_identifier: String,
     pub level_state: LevelState,
 }
 
 impl LevelResource {
     pub fn get_level(&self) -> Level {
         let level = LEVEL_DIR
-            .get_file(format!("{}.toml", self.current_level_number).as_str())
+            .get_file(format!("{}.toml", self.current_level_identifier).as_str())
             .expect("Level number not found")
             .contents_utf8()
             .unwrap();

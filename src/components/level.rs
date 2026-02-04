@@ -64,10 +64,16 @@ pub struct LevelLayer {
     pub height_map: String,
     pub modifiers: Vec<String>,
     pub movement_maps: Option<Vec<Vec<(isize, isize, isize)>>>,
+    pub sublevels: Option<Vec<String>>,
 }
 
 impl Level {
-    pub fn render_level(&self, commands: &mut Commands, asset_server: &Res<AssetServer>) {
+    pub fn render_level(
+        &self,
+        commands: &mut Commands,
+        asset_server: &Res<AssetServer>,
+        parent_level: Option<Level>,
+    ) {
         if !self.metadata.help_text.is_empty() {
             commands.spawn((
                 HelpTextMarker,
@@ -111,6 +117,7 @@ impl Level {
                 .collect();
 
             let mut num_movement_maps_applied = 0;
+            let mut num_sublevels_applied = 0;
 
             for (row_index, row) in heights.iter().enumerate() {
                 for (col_index, char) in row.iter().enumerate() {
@@ -122,6 +129,7 @@ impl Level {
 
                     let mut movement_map: Vec<(isize, isize, isize)> = vec![];
                     let mut is_icy: bool = false;
+                    let mut sublevel_identifier: Option<String> = None;
 
                     for modifier_map in &modifier_maps {
                         let modifier = modifier_map
@@ -166,6 +174,20 @@ impl Level {
                             'I' => {
                                 is_icy = true;
                             }
+                            'S' => {
+                                sublevel_identifier = Some(
+                                    layer
+                                        .sublevels
+                                        .clone()
+                                        .expect(
+                                            "Sublevel modifier found, but no sublevels specified",
+                                        )
+                                        .iter()
+                                        .nth(num_sublevels_applied)
+                                        .expect("Too few sublevels specified")
+                                        .clone(),
+                                );
+                            }
                             _ => continue,
                         };
                     }
@@ -178,6 +200,7 @@ impl Level {
                             true,
                             layer.pillars.unwrap_or(false),
                             is_icy,
+                            sublevel_identifier,
                             movement_map,
                             commands,
                             asset_server,
@@ -292,6 +315,7 @@ impl Level {
         is_on_top: bool,
         is_pillar: bool,
         is_icy: bool,
+        sublevel_identifier: Option<String>,
         movement_map: Vec<(isize, isize, isize)>,
         commands: &mut Commands,
         asset_server: &Res<AssetServer>,
@@ -341,6 +365,8 @@ impl Level {
             ));
         }
 
+        if sublevel_identifier.is_some() {}
+
         if y > 0 && is_pillar {
             self.get_tile_entity(
                 x,
@@ -349,6 +375,7 @@ impl Level {
                 false,
                 is_pillar,
                 false,
+                None,
                 movement_map,
                 commands,
                 asset_server,

@@ -18,7 +18,7 @@ pub fn build_level(
 ) {
     levels
         .get_level()
-        .render_level(&mut commands, &asset_server);
+        .render_level(&mut commands, &asset_server, None);
 }
 
 pub fn restart_level(
@@ -37,7 +37,7 @@ pub fn restart_level(
 
         levels
             .get_level()
-            .render_level(&mut commands, &asset_server);
+            .render_level(&mut commands, &asset_server, None);
     }
 }
 
@@ -61,10 +61,15 @@ pub fn go_to_next_level(
         }
 
         // Render new level
-        levels.current_level_number += 1;
+        levels.current_level_identifier = (levels
+            .current_level_identifier
+            .parse::<usize>()
+            .expect("Could not determine next level: level identifier was not numeric")
+            + 1)
+        .to_string();
         levels
             .get_level()
-            .render_level(&mut commands, &asset_server);
+            .render_level(&mut commands, &asset_server, None);
     }
 }
 

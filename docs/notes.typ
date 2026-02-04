@@ -104,6 +104,12 @@ Due to Bevy, the _xz_-plane is the "flat" ground plane. The _y_ axis points up. 
   - [x] If the player is on a tile that is moving, the player should move along with it.
     - [ ] This should keep in mind collisions, e.g. the player can be shoved off it it hits a wall along the way.
 - [x] Tiles may be _slippery_. If the player moves on them, the player will continue to move until an end is reached (wall, or edge of the map).
+- [ ] Tiles may contain _sublevels_. The tile itself should have some siwrly colour or indication that it is a "warp" tile.
+  - [ ] A sublevel. should always be a hexagonal grid. Ideally it should show outlines showing the boundary, when inside a sublevel.
+  - [ ] When attempting to move into the boundary, the player should go out of the sublevel into the parent level, traveling in the same direction.
+  - [ ] Note that the sublevel's hexagonal shape will be rotated 30 degrees with respect to its containing tile. This is not an issue and actually allows for interesting ways to exit the inner tile.
+  - [ ] What happens to moving tiles in a parent level while inside a sublevel? You cannot see it. Perhaps only tiles in the currently active sublevel should apply their movements?
+  - [ ] Could sublevels have _bananas_? And how would this interact with the main level?
 - [ ] Tiles may be _fragile_. After the player has stepped on it, it will crumble as soon as the player steps off it.
   - [ ] Some _fragile_ tiles might be rechargable.
 - [ ] _Crates_ are solid objects that the player can't traverse through, but can push. A push is only possible if the crate can occupy the target hex.

@@ -40,7 +40,7 @@ fn main() {
         .insert_resource(settings.clone())
         .insert_resource(ClearColor(Color::hsl(200.0, 0.0, 0.3)))
         .insert_resource(LevelResource {
-            current_level_number: settings.initial_level_number,
+            current_level_identifier: settings.initial_level_number.to_string(),
             ..default()
         })
         .insert_resource(WaterSettings {
